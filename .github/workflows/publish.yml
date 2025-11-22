@@ -28,7 +28,7 @@ jobs:
                         core.setOutput("build_id", context.runNumber);
             -   uses: actions/setup-dotnet@v4
                 with:
-                    dotnet-version: "9.0.x"
+                    dotnet-version: "10.0.x"
             -   name: Install dotnet Tools
                 run: dotnet tool restore
             -   name: Build with Cake
