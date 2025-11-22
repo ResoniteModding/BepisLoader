@@ -39,5 +39,5 @@ jobs:
                 with:
                     name: "BepInEx_Release_${{ steps.info.outputs.sha_short }}_${{ steps.info.outputs.build_id || 0 }}"
                     path: |
-                        "./bin/dist/*.zip"
-                        "./bin/dist/thunderstore-package/*.zip"
+                        ${{ github.workspace }}/bin/dist/*.zip
+                        ${{ github.workspace }}/bin/dist/thunderstore-package/*.zip

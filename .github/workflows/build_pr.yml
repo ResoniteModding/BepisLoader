@@ -23,5 +23,5 @@ jobs:
                 with:
                     name: "BepInEx_CI"
                     path: |
-                        "./bin/dist/*.zip"
-                        "./bin/dist/thunderstore-package/*.zip"
+                        ${{ github.workspace }}/bin/dist/*.zip
+                        ${{ github.workspace }}/bin/dist/thunderstore-package/*.zip
