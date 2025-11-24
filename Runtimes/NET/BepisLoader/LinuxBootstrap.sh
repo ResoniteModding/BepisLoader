@@ -72,9 +72,9 @@ main()
 	chmod +x "$RENDERER_SCRIPT"
 
 
-	# Install .NET 9 into the current directory
+	# Install .NET 10 into the current directory
 
-	bash "$DOTNET_INSTALL_SCRIPT" --verbose --channel 9.0 --runtime dotnet --install-dir "$DOTNET_ROOT"
+	bash "$DOTNET_INSTALL_SCRIPT" --verbose --channel 10.0 --runtime dotnet --install-dir "$DOTNET_ROOT"
 
 
 	# Not technically required, but mark dotnet itself as executable just in case.
@@ -87,10 +87,10 @@ main()
 		cat > "./BepisLoader.runtimeconfig.json" <<-'EOF'
 		{
 		  "runtimeOptions": {
-		    "tfm": "net9.0",
+		    "tfm": "net10.0",
 		    "framework": {
 		      "name": "Microsoft.NETCore.App",
-		      "version": "9.0.0"
+		      "version": "10.0.0"
 		    },
 		    "configProperties": {
 		      "System.Reflection.Metadata.MetadataUpdater.IsSupported": false,
@@ -150,6 +150,7 @@ main()
 	echo "Entry point: $ENTRY_POINT"
 
 	# ~ Launch Resonite! :) ~
+
 	exec "$DOTNET_EXECUTABLE" "$ENTRY_POINT" "$@"
 }
 

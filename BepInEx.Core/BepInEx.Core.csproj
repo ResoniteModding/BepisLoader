@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>BepInEx Core library</Description>
-        <TargetFrameworks>net9.0</TargetFrameworks>
+        <TargetFrameworks>net10.0</TargetFrameworks>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
         <!-- Force nuget assembly output on netstandard2.0 -->
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -12,9 +12,9 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All"/>
         <PackageReference Include="SemanticVersioning" Version="2.0.2"/>
-        <PackageReference Include="MonoMod.Utils" Version="25.0.8"/>
+        <PackageReference Include="MonoMod.Utils" Version="25.0.11"/>
         <PackageReference Include="Mono.Cecil" Version="0.11.6" />
-        <PackageReference Include="System.Drawing.Common" Version="9.0.8" />
+        <PackageReference Include="System.Drawing.Common" Version="10.0.0" />
     </ItemGroup>
     <ItemGroup>
         <Compile Remove="Contract\IPlugin.cs"/>

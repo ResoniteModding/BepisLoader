@@ -37,7 +37,7 @@ jobs:
                     workflow-id: build.yml
             -   uses: actions/setup-dotnet@v4
                 with:
-                    dotnet-version: "9.0.x"
+                    dotnet-version: "10.0.x"
             -   name: Build
                 run: |
                     ./build.sh --target Publish --build-type ${{ steps.info.outputs.build_type }} --build-id ${{ steps.info.outputs.build_id }} --last-build-commit \"${{ steps.setSHAs.outputs.base }}\" --nuget-api-key \"${{ secrets.NUGET_API_KEY }}\" --nuget-source https://nuget-modding.resonite.net/v3/index.json
@@ -46,7 +46,7 @@ jobs:
                     BEPISBUILDS_HOST: ${{ secrets.BEPISBUILDS_HOST }}
                 if: ${{ steps.info.outputs.build_type == 'BleedingEdge' && env.BEPISBUILDS_HOST != null }}
                 run: |
-                    artifacts_list=$(find ./bin/dist -maxdepth 1 -type f | tr '\n' ','); artifacts_list=${artifacts_list::-1};
+                    artifacts_list=$(find ${{ github.workspace }}/bin/dist -maxdepth 1 -type f | tr '\n' ','); artifacts_list=${artifacts_list::-1};
                     curl --upload-file "{${artifacts_list}}" --ftp-pasv --ftp-skip-pasv-ip --ftp-create-dirs --ftp-method singlecwd --disable-epsv "ftp://${{ secrets.BEPISBUILDS_AUTH }}@${{ secrets.BEPISBUILDS_HOST }}:${{ secrets.BEPISBUILDS_PORT }}/bepinex_be/artifacts/${{ steps.info.outputs.build_id }}/"
             -   name: Generate changelog
                 id: generate_changelog
@@ -77,6 +77,6 @@ jobs:
                 with:
                     name: "BepInEx_CI_${{ steps.info.outputs.build_type }}_${{ steps.info.outputs.sha_short }}_${{ steps.info.outputs.build_id || 0 }}"
                     path: |
-                        "./bin/dist/*.zip"
-                        "./bin/dist/thunderstore-package/*.zip"
+                        ${{ github.workspace }}/bin/dist/*.zip
+                        ${{ github.workspace }}/bin/dist/thunderstore-package/*.zip
       
