@@ -28,6 +28,24 @@ public static class Utility
         SemanticVersioning.Version.Parse(MetadataHelper.GetAttributes<AssemblyInformationalVersionAttribute>(typeof(Utility).Assembly)[0]
                                     .InformationalVersion);
 
+    /// <summary>
+    ///     Gets the BepisLoader version if available.
+    /// </summary>
+    /// <returns>The version string, or null if BepisLoader is not found.</returns>
+    public static Version GetBepisLoaderVersion()
+    {
+        try
+        {
+            var bepisLoaderAsm = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(a => a.GetName().Name == "BepisLoader");
+            return bepisLoaderAsm?.GetName().Version;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private const string TRUSTED_PLATFORM_ASSEMBLIES = "TRUSTED_PLATFORM_ASSEMBLIES";
     private static bool? sreEnabled;
 

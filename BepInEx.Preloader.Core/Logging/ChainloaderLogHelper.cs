@@ -50,6 +50,12 @@ public static class ChainloaderLogHelper
         Logger.Log(LogLevel.Info, $"System platform: {GetPlatformString()}");
         Logger.Log(LogLevel.Info,
                    $"Process bitness: {(PlatformUtils.ProcessIs64Bit ? "64-bit (x64)" : "32-bit (x86)")}");
+
+        var bepisLoaderVersion = Utility.GetBepisLoaderVersion();
+        if (bepisLoaderVersion != null)
+            Logger.Log(LogLevel.Info, $"Loader: BepisLoader {bepisLoaderVersion}");
+        else
+            Logger.Log(LogLevel.Info, "Loader: BepisLoader not found, version unknown");
     }
 
     private static string GetPlatformString()
