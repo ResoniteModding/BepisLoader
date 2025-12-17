@@ -7,6 +7,7 @@ namespace BepisLoader;
 public class BepisLoader
 {
     internal static string resoDir = string.Empty;
+    private static readonly string tfmFolder = "net10.0";
     internal static AssemblyLoadContext alc = null!;
     static void Main(string[] args)
     {
@@ -17,6 +18,14 @@ public class BepisLoader
 #endif
 
         alc = new BepisLoadContext();
+
+        // Load System.Management explicitly for Windows to avoid PlatformNotSupportedException
+        var systemManagementPath = RuntimeInformation.RuntimeIdentifier.StartsWith("win")
+            ? new FileInfo(Path.Combine(resoDir, "runtimes", "win", "lib", tfmFolder, "System.Management.dll"))
+            : new FileInfo(Path.Combine(resoDir, "System.Management.dll"));
+
+        if (systemManagementPath.Exists)
+            alc.LoadFromAssemblyPath(systemManagementPath.FullName);
 
         // TODO: removing this breaks stuff, idk why
         AppDomain.CurrentDomain.AssemblyResolve += ResolveGameDll;

@@ -12,16 +12,6 @@
         <DebugType>embedded</DebugType>
     </PropertyGroup>
 
-    <ItemGroup>
-        <Compile Remove="..\..\..\Hardware.Info\**" />
-        <EmbeddedResource Remove="..\..\..\Hardware.Info\**" />
-        <None Remove="..\..\..\Hardware.Info\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\Hardware.Info\Hardware.Info\Hardware.Info.csproj" />
-    </ItemGroup>
-
     <Target Name="RemoveExeAfterBuild" AfterTargets="Build">
         <Delete Condition="Exists('$(TargetDir)$(AssemblyName).exe')" Files="$(TargetDir)$(AssemblyName).exe" />
         <Delete Condition="Exists('$(TargetDir)$(AssemblyName)')"  Files="$(TargetDir)$(AssemblyName)" />
