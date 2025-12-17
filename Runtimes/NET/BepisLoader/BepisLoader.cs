@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 
 namespace BepisLoader;
@@ -7,7 +6,6 @@ namespace BepisLoader;
 public class BepisLoader
 {
     internal static string resoDir = string.Empty;
-    private static readonly string tfmFolder = "net10.0";
     internal static AssemblyLoadContext alc = null!;
     static void Main(string[] args)
     {
@@ -19,15 +17,7 @@ public class BepisLoader
 
         alc = new BepisLoadContext();
 
-        // Load System.Management explicitly for Windows to avoid PlatformNotSupportedException
-        var systemManagementPath = RuntimeInformation.RuntimeIdentifier.StartsWith("win")
-            ? new FileInfo(Path.Combine(resoDir, "runtimes", "win", "lib", tfmFolder, "System.Management.dll"))
-            : new FileInfo(Path.Combine(resoDir, "System.Management.dll"));
-
-        if (systemManagementPath.Exists)
-            alc.LoadFromAssemblyPath(systemManagementPath.FullName);
-
-        // TODO: removing this breaks stuff, idk why
+        // The game runs in the Default AssemblyLoadContext, not our custom BepisLoadContext. When code in the Default ALC requests a dependency, BepisLoadContext.Load() is never called, only this global AssemblyResolve event fires as a fallback.
         AppDomain.CurrentDomain.AssemblyResolve += ResolveGameDll;
 
         var bepinPath = Path.Combine(resoDir, "BepInEx");
@@ -40,8 +30,7 @@ public class BepisLoader
 
         var asm = alc.LoadFromAssemblyPath(Path.Combine(bepinPath, "core", "BepInEx.NET.CoreCLR.dll"));
 
-        var resoDllPath = Path.Combine(resoDir, "Renderite.Host.dll");
-        if (!File.Exists(resoDllPath)) resoDllPath = Path.Combine(resoDir, "Resonite.dll");
+        var resoDllPath = GetResoDllPath();
 
         var t = asm.GetType("StartupHook");
         var m = t.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static, [typeof(string), typeof(string), typeof(AssemblyLoadContext)]);
@@ -80,8 +69,6 @@ public class BepisLoader
             return found;
         }
 
-        if (assemblyName.Name == "System.Management") return null;
-
         var targetPath = Path.Combine(resoDir, assemblyName.Name + ".dll");
         if (File.Exists(targetPath))
         {
@@ -92,73 +79,46 @@ public class BepisLoader
         return null;
     }
 
+    private static string GetResoDllPath()
+    {
+        var path = Path.Combine(resoDir, "Renderite.Host.dll");
+        return File.Exists(path) ? path : Path.Combine(resoDir, "Resonite.dll");
+    }
+
     private class BepisLoadContext : AssemblyLoadContext
     {
+        private readonly AssemblyDependencyResolver? _resolver;
+
+        public BepisLoadContext() : base(isCollectible: false)
+        {
+            var resoDllPath = GetResoDllPath();
+
+            if (File.Exists(resoDllPath))
+                _resolver = new AssemblyDependencyResolver(resoDllPath);
+        }
+
         protected override Assembly? Load(AssemblyName assemblyName)
         {
-            return ResolveInternal(assemblyName);
+            // Check already-loaded assemblies first
+            var found = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(x => x.GetName().Name == assemblyName.Name);
+            if (found != null) return found;
+
+            // Use deps.json resolution
+            string? assemblyPath = _resolver?.ResolveAssemblyToPath(assemblyName);
+            return assemblyPath != null ? LoadFromAssemblyPath(assemblyPath) : null;
         }
 
         protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
         {
-            var rid = GetRuntimeIdentifier();
-
-            var nativeLibs = Path.Join(resoDir, "runtimes", rid, "native");
-            IEnumerable<string> potentialPaths = [unmanagedDllName, Path.Combine(nativeLibs, GetUnmanagedLibraryName(unmanagedDllName))];
-            if (unmanagedDllName.EndsWith("steam_api64.so")) potentialPaths = ((IEnumerable<string>)["libsteam_api.so"]).Concat(potentialPaths);
-
             Log("NativeLib " + unmanagedDllName);
-            foreach (var path in potentialPaths)
+            string? libraryPath = _resolver?.ResolveUnmanagedDllToPath(unmanagedDllName);
+            if (libraryPath != null)
             {
-                Log("  Testing: " + path);
-                if (File.Exists(path))
-                {
-                    Log("  Exists! " + path);
-                    var dll = LoadUnmanagedDllFromPath(path);
-                    if (dll != IntPtr.Zero)
-                    {
-                        Log("  Loaded! " + path);
-                        return dll;
-                    }
-                }
+                Log("  Resolved: " + libraryPath);
+                return LoadUnmanagedDllFromPath(libraryPath);
             }
-
             return IntPtr.Zero;
-        }
-
-
-        private static string GetRuntimeIdentifier()
-        {
-            string os;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                os = "win";
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                os = "osx";
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                os = "linux";
-            else
-                throw new PlatformNotSupportedException();
-
-            string arch = RuntimeInformation.OSArchitecture switch
-            {
-                Architecture.X86 => "-x86",
-                Architecture.X64 => "-x64",
-                Architecture.Arm64 => "-arm64",
-                _ => ""
-            };
-
-            return $"{os}{arch}";
-        }
-        private static string GetUnmanagedLibraryName(string name)
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return $"{name}.dll";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                return $"lib{name}.so";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                return $"lib{name}.dylib";
-
-            throw new PlatformNotSupportedException();
         }
     }
 
