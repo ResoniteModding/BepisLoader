@@ -467,39 +467,6 @@ public sealed class MakeDistTask : FrostingTask<BuildContext>
                         ctx.Log.Warning($"hookfxr cache directory not found: {hookfxrPath}");
                     }
 
-                    // Replace contents of BepisLoader.runtimeconfig.json with the proper framework configuration for windows
-                    var runtimeConfigPath = targetDir.CombineWithFilePath("BepisLoader.runtimeconfig.json");
-                    if (ctx.FileExists(runtimeConfigPath))
-                    {
-                        var runtimeConfig = """
-                            {
-                              "runtimeOptions": {
-                                "tfm": "net10.0",
-                                "frameworks": [
-                                  {
-                                    "name": "Microsoft.NETCore.App",
-                                    "version": "10.0.0"
-                                  },
-                                  {
-                                    "name": "Microsoft.WindowsDesktop.App",
-                                    "version": "10.0.0"
-                                  }
-                                ],
-                                "configProperties": {
-                                  "System.Reflection.Metadata.MetadataUpdater.IsSupported": false,
-                                  "System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization": false
-                                }
-                              }
-                            }
-                            """;
-                        System.IO.File.WriteAllText(runtimeConfigPath.FullPath, runtimeConfig);
-                        ctx.Log.Information("Updated BepisLoader.runtimeconfig.json with proper framework configuration");
-                    }
-                    else
-                    {
-                        ctx.Log.Warning($"BepisLoader.runtimeconfig.json not found at: {runtimeConfigPath}");
-                    }
-
                     // Copy icon.ico from BepisLoader project directory to BepInEx folder
                     var iconPath = ctx.RootDirectory.CombineWithFilePath("Runtimes/NET/BepisLoader/icon.ico");
                     if (ctx.FileExists(iconPath))
