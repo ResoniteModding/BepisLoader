@@ -11,7 +11,7 @@ websiteUrl = "https://github.com/ResoniteModding/BepisLoader/tree/master/Runtime
 containsNsfwContent = false
 
 [package.dependencies]
-ResoniteModding-BepInExResoniteShim = "0.9.2"
+ResoniteModding-BepInExResoniteShim = "0.9.3"
 
 [build]
 icon = "./icon.png"
