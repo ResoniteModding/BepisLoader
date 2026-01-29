@@ -50,7 +50,7 @@ namespace BepInEx.NET.Shared
                     {
                         assembly = Assembly.LoadFrom(path);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         continue;
                     }
@@ -139,6 +139,6 @@ namespace BepInEx.NET.Shared
         /// <param name="assembly">The loaded assembly.</param>
         /// <returns>True, if the assembly was found and loaded. Otherwise, false.</returns>
         public static bool TryResolveDllAssembly(AssemblyName assemblyName, string directory, out Assembly assembly) =>
-            TryResolveDllAssembly(assemblyName, directory, Assembly.LoadFrom, out assembly);
+            TryResolveDllAssembly(assemblyName, directory, Utility.LoadContext.LoadFromAssemblyPath, out assembly);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,7 +16,7 @@ public abstract class BaseChainloader<TPlugin>
 {
     protected static readonly string CurrentAssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
     protected static readonly Version CurrentAssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
-
+    private static readonly Dictionary<string, bool> RefCache = new();
     private static Regex allowedGuidRegex { get; } = new(@"^[a-zA-Z0-9\._\-]+$");
 
     /// <summary>
@@ -88,14 +88,34 @@ public abstract class BaseChainloader<TPlugin>
             Location = assemblyLocation
         };
     }
+    static bool ReferencesThisAssembly(AssemblyDefinition ass, HashSet<string> seen = null)
+    {
+        seen ??= new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        var key = ass.Name.FullName;
+        if (RefCache.TryGetValue(key, out var hit)) return hit;
+
+        if (!seen.Add(ass.Name.Name)) return RefCache[key] = false;
+
+        if (ass.MainModule.AssemblyReferences.Any(r => r.Name == CurrentAssemblyName)) return RefCache[key] = true;
+
+        foreach (var r in ass.MainModule.AssemblyReferences)
+        {
+            var dep = ass.MainModule.AssemblyResolver.Resolve(r);
+            if (dep != null && ReferencesThisAssembly(dep, seen))
+                return RefCache[key] = true;
+        }
+        return RefCache[key] = false;
+    }
     protected static bool HasBepinPlugins(AssemblyDefinition ass)
     {
-        if (ass.MainModule.AssemblyReferences.All(r => r.Name != CurrentAssemblyName))
+        if (!ReferencesThisAssembly(ass))
             return false;
-        if (ass.MainModule.GetTypeReferences().All(r => r.FullName != typeof(BepInPlugin).FullName))
+        if (ass.MainModule.GetTypeReferences().All(r => r.FullName != typeof(BepInPlugin).FullName)) {
+            if (ass.MainModule.GetTypeReferences().Any(r => MetadataHelper.TypeInheretsFrom(r, typeof(BepInPlugin))))
+                return true;
             return false;
-
+        }
         return true;
     }
 
@@ -111,7 +131,7 @@ public abstract class BaseChainloader<TPlugin>
 
     #region Contract
 
-    protected virtual string ConsoleTitle => $"BepInEx {Paths.BepInExVersion} - {Paths.ProcessName}";
+    protected virtual string ConsoleTitle => $"BepInEx {Utility.BepInExVersion} - {Paths.ProcessName}";
 
     private bool _initialized;
 
@@ -171,6 +191,41 @@ public abstract class BaseChainloader<TPlugin>
                 Logger.Listeners.Add(new ConsoleLogListener());
 
             ConsoleManager.SetConsoleTitle(ConsoleTitle);
+
+            // Load icon from file relative to assembly location
+            var assembly = Assembly.GetExecutingAssembly();
+            var assemblyLocation = assembly.Location;
+            var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+            var iconPath = Path.Combine(assemblyDirectory, "..", "icon.ico");
+            iconPath = Path.GetFullPath(iconPath);
+
+            if (File.Exists(iconPath))
+            {
+                try
+                {
+                    using (var stream = File.OpenRead(iconPath))
+                    {
+                        ConsoleManager.SetConsoleIcon(stream);
+                    }
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Logger.Log(LogLevel.Warning, $"Failed to set console icon: {ex.Message}");
+                }
+                catch (ArgumentException ex)
+                {
+                    Logger.Log(LogLevel.Warning, $"Invalid icon data: {ex.Message}");
+                }
+                catch (IOException ex)
+                {
+                    Logger.Log(LogLevel.Warning, $"Failed to read icon file: {ex.Message}");
+                }
+            }
+            else
+            {
+                Logger.Log(LogLevel.Warning, $"Icon file not found at: {iconPath}");
+            }
+
         }
 
         if (ConfigDiskLogging.Value)
@@ -404,7 +459,7 @@ public abstract class BaseChainloader<TPlugin>
                 Logger.Log(LogLevel.Info, $"Loading [{plugin}]");
 
                 if (!loadedAssemblies.TryGetValue(plugin.Location, out var ass))
-                    loadedAssemblies[plugin.Location] = ass = Assembly.LoadFrom(plugin.Location);
+                    loadedAssemblies[plugin.Location] = ass = Utility.LoadContext.LoadFromAssemblyPath(plugin.Location);
 
                 Plugins[plugin.Metadata.GUID] = plugin;
                 TryRunModuleCtor(plugin, ass);

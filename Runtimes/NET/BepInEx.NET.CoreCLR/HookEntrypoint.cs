@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Loader;
+using BepInEx.Core;
 using BepInEx.Logging;
 using BepInEx.NET.CoreCLR;
 using BepInEx.NET.Shared;
 using BepInEx.Preloader.Core;
 
-internal class StartupHook
+public class StartupHook
 {
     public static List<string> ResolveDirectories = new();
 
@@ -15,25 +17,31 @@ internal class StartupHook
 
     public static void Initialize()
     {
+        var executableFilename = Process.GetCurrentProcess().MainModule.FileName;
+
+        var assemblyFilename = TryDetermineAssemblyNameFromDotnet(executableFilename)
+                            ?? TryDetermineAssemblyNameFromStubExecutable(executableFilename)
+                            ?? TryDetermineAssemblyNameFromCurrentAssembly(executableFilename);
+
+        Initialize(assemblyFilename);
+    }
+
+    public static void Initialize(string assemblyFilename, string bepinRootPath = null, AssemblyLoadContext alc = null)
+    {
         var silentExceptionLog = $"bepinex_preloader_{DateTime.Now:yyyyMMdd_HHmmss_fff}.log";
 
         try
         {
-//#if DEBUG
-//          filename =
-//              Path.Combine(Directory.GetCurrentDirectory(),
-//                           Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName));
-//          ResolveDirectories.Add(Path.GetDirectoryName(filename));
+            //#if DEBUG
+            //          filename =
+            //              Path.Combine(Directory.GetCurrentDirectory(),
+            //                           Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName));
+            //          ResolveDirectories.Add(Path.GetDirectoryName(filename));
 
-//          // for debugging within VS
-//          ResolveDirectories.Add(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
-//#else
-            
-            var executableFilename = Process.GetCurrentProcess().MainModule.FileName;
-            
-            var assemblyFilename = TryDetermineAssemblyNameFromDotnet(executableFilename)
-                                ?? TryDetermineAssemblyNameFromStubExecutable(executableFilename)
-                                ?? TryDetermineAssemblyNameFromCurrentAssembly(executableFilename);
+            //          // for debugging within VS
+            //          ResolveDirectories.Add(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
+            //#else
+
 
             string gameDirectory = null;
 
@@ -42,22 +50,25 @@ internal class StartupHook
 
             string bepinexCoreDirectory = null;
 
-            if (gameDirectory != null)
+            if (bepinRootPath != null)
+                bepinexCoreDirectory = Path.Combine(bepinRootPath, "core");
+
+            if (bepinexCoreDirectory == null && gameDirectory != null)
                 bepinexCoreDirectory = Path.Combine(gameDirectory, "BepInEx", "core");
 
             if (assemblyFilename == null || gameDirectory == null || !Directory.Exists(bepinexCoreDirectory))
             {
                 throw new Exception("Could not determine game location, or BepInEx install location");
             }
-            
+
             silentExceptionLog = Path.Combine(gameDirectory, silentExceptionLog);
-            
+
             ResolveDirectories.Add(bepinexCoreDirectory);
-//#endif
+            //#endif
 
             AppDomain.CurrentDomain.AssemblyResolve += SharedEntrypoint.RemoteResolve(ResolveDirectories);
 
-            NetCorePreloaderRunner.OuterMain(assemblyFilename);
+            NetCorePreloaderRunner.OuterMain(assemblyFilename, bepinRootPath, alc);
         }
         catch (Exception ex)
         {
@@ -147,10 +158,6 @@ namespace BepInEx.NET.CoreCLR
         {
             ConsoleManager.Initialize(false, true);
 
-            ConsoleManager.CreateConsole();
-
-            Logger.Listeners.Add(new ConsoleLogListener());
-
             try
             {
                 NetCorePreloader.Start();
@@ -162,13 +169,15 @@ namespace BepInEx.NET.CoreCLR
             }
         }
 
-        internal static void OuterMain(string filename)
+        internal static void OuterMain(string filename, string bepinRootPath, AssemblyLoadContext alc)
         {
             PlatformUtils.SetPlatform();
 
-            Paths.SetExecutablePath(filename);
+            Paths.SetExecutablePath(filename, bepinRootPath);
 
             AppDomain.CurrentDomain.AssemblyResolve += SharedEntrypoint.LocalResolve;
+
+            Utility.LoadContext = alc ?? AssemblyLoadContext.Default;
 
             PreloaderMain();
         }

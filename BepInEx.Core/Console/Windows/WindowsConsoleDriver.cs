@@ -1,11 +1,13 @@
 using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using BepInEx.ConsoleUtil;
+using BepInEx.Core;
 using HarmonyLib;
 using Microsoft.Win32.SafeHandles;
-using MonoMod.Utils;
 using UnityInjector.ConsoleUtil;
 
 namespace BepInEx;
@@ -141,13 +143,25 @@ internal class WindowsConsoleDriver : IConsoleDriver
 
     public void SetConsoleTitle(string title) => ConsoleWindow.Title = title;
 
+    [SupportedOSPlatform("windows6.1")]
+    public void SetConsoleIcon(Stream iconStream)
+    {
+        if (iconStream == null)
+            throw new ArgumentNullException(nameof(iconStream));
+        
+        if (iconStream.Length == 0)
+            throw new ArgumentException("Icon stream is empty", nameof(iconStream));
+        
+        ConsoleWindow.Icon = new Icon(iconStream);
+    }
+
     private static Stream OpenFileStream(IntPtr handle)
     {
-        if (ReflectionHelper.IsCore)
+        if (PlatformUtils.IsCore)
         {
             var windowsConsoleStreamType = Type.GetType("System.ConsolePal+WindowsConsoleStream, System.Console", true);
             var constructor = AccessTools.Constructor(windowsConsoleStreamType,
-                                                      new[] { typeof(IntPtr), typeof(FileAccess), typeof(bool) });
+                                                        new[] { typeof(IntPtr), typeof(FileAccess), typeof(bool) });
             return (Stream)constructor.Invoke(new object[] { handle, FileAccess.Write, true });
         }
 

@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.Loader;
 using System.Security.Cryptography;
 using System.Text;
 using Mono.Cecil;
@@ -15,6 +16,18 @@ namespace BepInEx;
 /// </summary>
 public static class Utility
 {
+    /// <summary>
+    /// Assembly Load Context for BepInEx, all game assemblies should be loaded here.
+    /// </summary>
+    public static AssemblyLoadContext LoadContext = null!;
+
+    /// <summary>
+    ///    BepInEx version.
+    /// </summary>
+    public static SemanticVersioning.Version BepInExVersion =
+        SemanticVersioning.Version.Parse(MetadataHelper.GetAttributes<AssemblyInformationalVersionAttribute>(typeof(Utility).Assembly)[0]
+                                    .InformationalVersion);
+
     private const string TRUSTED_PLATFORM_ASSEMBLIES = "TRUSTED_PLATFORM_ASSEMBLIES";
     private static bool? sreEnabled;
 
@@ -242,7 +255,7 @@ public static class Utility
     /// <param name="assembly">The loaded assembly.</param>
     /// <returns>True, if the assembly was found and loaded. Otherwise, false.</returns>
     public static bool TryResolveDllAssembly(AssemblyName assemblyName, string directory, out Assembly assembly) =>
-        TryResolveDllAssembly(assemblyName, directory, Assembly.LoadFrom, out assembly);
+        TryResolveDllAssembly(assemblyName, directory, LoadContext.LoadFromAssemblyPath, out assembly);
 
     /// <summary>
     ///     Try to resolve and load the given assembly DLL.
