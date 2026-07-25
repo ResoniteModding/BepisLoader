@@ -58,7 +58,7 @@ public class PatcherPluginInfoAttribute : Attribute
 
     internal static PatcherPluginInfoAttribute FromCecilType(TypeDefinition td)
     {
-        var attr = MetadataHelper.GetCustomAttributes<PatcherPluginInfoAttribute>(td, false).FirstOrDefault();
+        var attr = MetadataHelper.GetCustomAttributes<PatcherPluginInfoAttribute>(td, false, true).FirstOrDefault();
 
         if (attr == null)
             return null;
