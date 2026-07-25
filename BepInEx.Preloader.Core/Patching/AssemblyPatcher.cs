@@ -65,7 +65,6 @@ public class AssemblyPatcher : IDisposable
 
     private PatcherPluginMetadata ToPatcherPlugin(TypeDefinition type, string assemblyPath)
     {
-
         if (type.IsInterface || type.IsAbstract && !type.IsSealed)
             return null;
 
