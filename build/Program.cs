@@ -356,8 +356,9 @@ public sealed class MakeDistTask : FrostingTask<BuildContext>
 
             if (dist.Engine == "Unity")
             {
-                var doorstopPath =
-                    ctx.CacheDirectory.Combine("doorstop").Combine($"doorstop_{dist.Os}").Combine(dist.Arch);
+                var doorstopPath = dist.Os == "macos"
+                    ? ctx.CacheDirectory.Combine("doorstop").Combine("doorstop_macos").Combine("universal")
+                    : ctx.CacheDirectory.Combine("doorstop").Combine($"doorstop_{dist.Os}").Combine(dist.Arch);
                 foreach (var filePath in ctx.GetFiles(doorstopPath.Combine($"*.{dist.DllExtension}").FullPath))
                     ctx.CopyFileToDirectory(filePath, targetDir);
                 ctx.CopyFileToDirectory(doorstopPath.CombineWithFilePath(".doorstop_version"), targetDir);
