@@ -12,7 +12,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All"/>
         <PackageReference Include="SemanticVersioning" Version="3.0.0"/>
-        <PackageReference Include="MonoMod.Utils" Version="25.0.11"/>
+        <PackageReference Include="MonoMod.Utils" Version="25.0.13"/>
         <PackageReference Include="Mono.Cecil" Version="0.11.6" />
         <PackageReference Include="System.Drawing.Common" Version="10.0.2" />
     </ItemGroup>
