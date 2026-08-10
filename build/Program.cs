@@ -102,17 +102,17 @@ public class BuildContext : FrostingContext
 
     public string VersionSuffix => BuildType switch
     {
-        ProjectBuildType.Release => "",
-        ProjectBuildType.Development => "dev",
+        ProjectBuildType.Release      => "",
+        ProjectBuildType.Development  => "dev",
         ProjectBuildType.BleedingEdge => $"be.{BuildId}",
-        var _ => throw new ArgumentOutOfRangeException()
+        var _                         => throw new ArgumentOutOfRangeException()
     };
 
     public string BuildPackageVersion =>
         VersionPrefix + BuildType switch
         {
             ProjectBuildType.Release => "",
-            var _ => $"-{VersionSuffix}+{this.GitShortenSha(RootDirectory, CurrentCommit)}",
+            var _                    => $"-{VersionSuffix}+{this.GitShortenSha(RootDirectory, CurrentCommit)}",
         };
 
     public static string DoorstopZipUrl(string arch) =>
@@ -356,8 +356,9 @@ public sealed class MakeDistTask : FrostingTask<BuildContext>
 
             if (dist.Engine == "Unity")
             {
-                var doorstopPath =
-                    ctx.CacheDirectory.Combine("doorstop").Combine($"doorstop_{dist.Os}").Combine(dist.Arch);
+                var doorstopPath = dist.Os == "macos"
+                    ? ctx.CacheDirectory.Combine("doorstop").Combine("doorstop_macos").Combine("universal")
+                    : ctx.CacheDirectory.Combine("doorstop").Combine($"doorstop_{dist.Os}").Combine(dist.Arch);
                 foreach (var filePath in ctx.GetFiles(doorstopPath.Combine($"*.{dist.DllExtension}").FullPath))
                     ctx.CopyFileToDirectory(filePath, targetDir);
                 ctx.CopyFileToDirectory(doorstopPath.CombineWithFilePath(".doorstop_version"), targetDir);
@@ -688,3 +689,4 @@ public sealed class PublishTask : FrostingTask<BuildContext>
 [TaskName("Default")]
 [IsDependentOn(typeof(CompileTask))]
 public class DefaultTask : FrostingTask { }
+

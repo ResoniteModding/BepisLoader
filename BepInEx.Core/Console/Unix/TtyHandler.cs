@@ -1,4 +1,4 @@
-// Sections of this code have been abridged from https://github.com/mono/mono/blob/master/mcs/class/corlib/System/TermInfoReader.cs under the MIT license
+﻿// Sections of this code have been abridged from https://github.com/mono/mono/blob/master/mcs/class/corlib/System/TermInfoReader.cs under the MIT license
 
 using System;
 using System.IO;
