@@ -140,9 +140,9 @@ internal static class PlatformUtils
             var windowsVersionInfo = new WindowsOSVersionInfoExW();
             RtlGetVersion(ref windowsVersionInfo);
 
-            WindowsVersion = new Version((int)windowsVersionInfo.dwMajorVersion,
-                                         (int)windowsVersionInfo.dwMinorVersion, 0,
-                                         (int)windowsVersionInfo.dwBuildNumber);
+            WindowsVersion = new Version((int) windowsVersionInfo.dwMajorVersion,
+                                         (int) windowsVersionInfo.dwMinorVersion, 0,
+                                         (int) windowsVersionInfo.dwBuildNumber);
 
             var ntDll = LoadLibrary("ntdll.dll");
             if (ntDll != IntPtr.Zero)

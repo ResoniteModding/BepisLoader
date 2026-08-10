@@ -162,7 +162,7 @@ internal class WindowsConsoleDriver : IConsoleDriver
         {
             var windowsConsoleStreamType = Type.GetType("System.ConsolePal+WindowsConsoleStream, System.Console", true);
             var constructor = AccessTools.Constructor(windowsConsoleStreamType,
-                                                        new[] { typeof(IntPtr), typeof(FileAccess), typeof(bool) });
+                                                      new[] { typeof(IntPtr), typeof(FileAccess), typeof(bool) });
             return (Stream)constructor.Invoke(new object[] { handle, FileAccess.Write, true });
         }
 
@@ -192,3 +192,4 @@ internal class WindowsConsoleDriver : IConsoleDriver
         }
     }
 }
+

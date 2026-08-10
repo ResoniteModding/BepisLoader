@@ -32,17 +32,16 @@ public class StartupHook
 
         try
         {
-            //#if DEBUG
-            //          filename =
-            //              Path.Combine(Directory.GetCurrentDirectory(),
-            //                           Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName));
-            //          ResolveDirectories.Add(Path.GetDirectoryName(filename));
+//#if DEBUG
+//          filename =
+//              Path.Combine(Directory.GetCurrentDirectory(),
+//                           Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName));
+//          ResolveDirectories.Add(Path.GetDirectoryName(filename));
 
-            //          // for debugging within VS
-            //          ResolveDirectories.Add(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
-            //#else
-
-
+//          // for debugging within VS
+//          ResolveDirectories.Add(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
+//#else
+            
             string gameDirectory = null;
 
             if (assemblyFilename != null)
@@ -60,11 +59,11 @@ public class StartupHook
             {
                 throw new Exception("Could not determine game location, or BepInEx install location");
             }
-
+            
             silentExceptionLog = Path.Combine(gameDirectory, silentExceptionLog);
-
+            
             ResolveDirectories.Add(bepinexCoreDirectory);
-            //#endif
+//#endif
 
             AppDomain.CurrentDomain.AssemblyResolve += SharedEntrypoint.RemoteResolve(ResolveDirectories);
 
@@ -183,3 +182,4 @@ namespace BepInEx.NET.CoreCLR
         }
     }
 }
+

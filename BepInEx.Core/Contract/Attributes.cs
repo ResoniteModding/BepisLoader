@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -276,7 +276,7 @@ public static class MetadataHelper
         var currentType = td;
 
         do
-        {           
+        {
             result.AddRange(currentType.CustomAttributes.Where(inheritAttribute ? (ca => TypeInheretsFrom(ca.AttributeType, type)) : (ca => ca.AttributeType.FullName == type.FullName)));
             currentType = currentType.BaseType?.Resolve();
         } while (inheritType && currentType?.FullName != "System.Object");
@@ -353,3 +353,4 @@ public static class MetadataHelper
 }
 
 #endregion
+
