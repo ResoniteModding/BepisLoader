@@ -3,7 +3,7 @@
 # This is a bootstrapper to run Resonite in what is quite the unorthodox
 # configuration on Linux.
 #
-# This script is executed by the "ResoBoot" bootstrapper if ResoBoot
+# This script is executed by the "Renderite.Boot" bootstrapper if it
 # detects it's running under Proton/Wine.
 #
 # The following shell code is responsible for installing an adequate runtime
@@ -27,7 +27,6 @@ PATH="$PATH":"$DOTNET_ROOT":"$DOTNET_ROOT"/tools
 
 DOTNET_INSTALL_SCRIPT="$PWD/dotnet-install.sh"
 DOTNET_EXECUTABLE="$DOTNET_ROOT/dotnet"
-RENDERER_SCRIPT="Renderer/Renderite.Renderer.sh"
 
 # terminal_execute()
 # {
@@ -58,19 +57,21 @@ RENDERER_SCRIPT="Renderer/Renderite.Renderer.sh"
 # 	# "$*" 2>/dev/null
 # }
 
+# Overload the 'dotnet' command so that it calls the version which was
+# downloaded by the script rather than potentially call (or fail to call)
+# the system's main dotnet runtime.
+
+dotnet()
+{
+	"$DOTNET_EXECUTABLE" "$@"
+}
+
 main()
 {
 	# Make sure the dotnet installer is executable, grab the .NET 9.0 runtime and
 	# just place it in the main Resonite folder.
 
 	chmod +x "$DOTNET_INSTALL_SCRIPT"
-
-
-	# Also make sure that the alternate Renderite script is executable as well
-	# so that Resonite can run it.
-
-	chmod +x "$RENDERER_SCRIPT"
-
 
 	# Install .NET 10 into the current directory
 
@@ -151,7 +152,7 @@ main()
 
 	# ~ Launch Resonite! :) ~
 
-	exec "$DOTNET_EXECUTABLE" "$ENTRY_POINT" "$@"
+	dotnet "$ENTRY_POINT" "$@"
 }
 
 main "$@"
