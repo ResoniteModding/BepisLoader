@@ -26,7 +26,7 @@ namespace BepInEx.NET.CoreCLR
             string entrypointAssemblyPath = !Paths.ExecutablePath.EndsWith(StartupHook.DoesNotExistPath) ? Paths.ExecutablePath : null;
 
             TypeLoader.SearchDirectories.Add(Paths.GameRootPath);
-
+            
             Logger.Sources.Add(TraceLogSource.CreateSource());
 
             ChainloaderLogHelper.PrintLogInfo(Log);

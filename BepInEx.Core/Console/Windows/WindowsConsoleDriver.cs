@@ -94,8 +94,9 @@ internal class WindowsConsoleDriver : IConsoleDriver
         // Make sure of ConsoleEncoding helper class because on some Monos
         // Encoding.GetEncoding throws NotImplementedException on most codepages
         // NOTE: We don't set Console.OutputEncoding because it resets any existing Console.Out writers
-        if (!useManagedEncoder)
-            ConsoleEncoding.ConsoleCodePage = codepage;
+        // Always set the console output codepage so the Windows console interprets bytes correctly,
+        // regardless of whether we use a managed encoder or ConsoleEncoding to produce those bytes.
+        ConsoleEncoding.ConsoleCodePage = codepage;
 
         // If stdout exists, write to it, otherwise make it the same as console out
         // Not sure if this is needed? Does the original Console.Out still work?
@@ -161,7 +162,7 @@ internal class WindowsConsoleDriver : IConsoleDriver
         {
             var windowsConsoleStreamType = Type.GetType("System.ConsolePal+WindowsConsoleStream, System.Console", true);
             var constructor = AccessTools.Constructor(windowsConsoleStreamType,
-                                                        new[] { typeof(IntPtr), typeof(FileAccess), typeof(bool) });
+                                                      new[] { typeof(IntPtr), typeof(FileAccess), typeof(bool) });
             return (Stream)constructor.Invoke(new object[] { handle, FileAccess.Write, true });
         }
 
@@ -191,3 +192,4 @@ internal class WindowsConsoleDriver : IConsoleDriver
         }
     }
 }
+

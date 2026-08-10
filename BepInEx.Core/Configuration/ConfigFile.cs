@@ -34,7 +34,7 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
 
         if (File.Exists(ConfigFilePath))
             Reload();
-        else if (saveOnInit) Save();
+        else if (saveOnInit) TrySave();
     }
 
     public static ConfigFile CoreConfig { get; } = new(Paths.BepInExConfigPath, true);
@@ -92,9 +92,12 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     public ConfigEntryBase this[string section, string key] => this[new ConfigDefinition(section, key)];
 
     /// <inheritdoc />
-    public IEnumerator<KeyValuePair<ConfigDefinition, ConfigEntryBase>> GetEnumerator() =>
-        // We can't really do a read lock for this
-        Entries.GetEnumerator();
+    public IEnumerator<KeyValuePair<ConfigDefinition, ConfigEntryBase>> GetEnumerator()
+    {
+        // Enumerate a snapshot taken under the lock so a concurrent mutation cannot invalidate the iterator.
+        lock (_ioLock)
+            return Entries.ToList().GetEnumerator();
+    }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -352,6 +355,24 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
         }
     }
 
+    /// <summary>
+    ///     Writes the config to disk like <see cref="Save" />, but logs and swallows I/O failures (e.g. a read-only
+    ///     or locked config file) instead of throwing. Used only for the creation-time saves (initial file write and
+    ///     new-entry binds), which can run before logging is up; explicit saves and setting changes still throw.
+    /// </summary>
+    private void TrySave()
+    {
+        try
+        {
+            Save();
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            Logger.Log(LogLevel.Warning,
+                $"Could not write config file {ConfigFilePath}: {e.Message}. Continuing with the in-memory configuration.");
+        }
+    }
+
     #endregion
 
     #region Wraps
@@ -452,7 +473,7 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
             }
 
             if (SaveOnConfigSet)
-                Save();
+                TrySave();
 
             return entry;
         }
