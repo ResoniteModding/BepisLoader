@@ -115,12 +115,15 @@ public class AssemblyPatcher : IDisposable
 
     private bool HasPatcherPlugins(AssemblyDefinition ass)
     {
-        if (ass.MainModule.AssemblyReferences.All(r => r.Name != CurrentAssemblyName) &&
-            ass.Name.Name != CurrentAssemblyName)
-            return false;
+        if (!BepInEx.Bootstrap.BaseChainloader<BepInPlugin>.ReferencesThisAssembly(ass)) return false;
         if (ass.MainModule.GetTypeReferences().All(r => r.FullName != typeof(BasePatcher).FullName))
+        {
+            if (ass.MainModule.GetTypeReferences().Any((TypeReference r) => MetadataHelper.TypeInheretsFrom(r, typeof(BasePatcher))))
+            {
+                return true;
+            }
             return false;
-
+        }
         return true;
     }
 
