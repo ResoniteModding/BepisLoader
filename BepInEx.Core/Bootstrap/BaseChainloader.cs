@@ -229,9 +229,14 @@ public abstract class BaseChainloader<TPlugin>
         }
 
         if (ConfigDiskLogging.Value)
+        {
+            if (!ConfigDiskAppend.Value && Paths.BepInExRootPath != null)
+                LogArchiver.ArchiveExistingLogs(Paths.BepInExRootPath, ConfigLogHistoryRetentionDays.Value);
+
             Logger.Listeners.Add(new DiskLogListener("LogOutput.log", ConfigDiskLoggingDisplayedLevel.Value,
                                                      ConfigDiskAppend.Value, ConfigDiskLoggingInstantFlushing.Value,
                                                      ConfigDiskLoggingFileLimit.Value));
+        }
 
         if (!TraceLogSource.IsListening)
             Logger.Sources.Add(TraceLogSource.CreateSource());
@@ -575,6 +580,15 @@ public abstract class BaseChainloader<TPlugin>
      new StringBuilder()
          .AppendLine("The maximum amount of concurrent log files that will be written to disk.")
          .AppendLine("As one log file is used per open game instance, you may find it necessary to increase this limit when debugging multiple instances at the same time.")
+         .ToString());
+
+    private static readonly ConfigEntry<int> ConfigLogHistoryRetentionDays = ConfigFile.CoreConfig.Bind(
+     "Logging.Disk", "LogHistoryRetentionDays",
+     14,
+     new StringBuilder()
+         .AppendLine("Number of days to keep archived log files in the BepInEx/Logs directory.")
+         .AppendLine("Logs older than this will be automatically deleted on startup.")
+         .AppendLine("Set to 0 to disable log archiving.")
          .ToString());
 
     #endregion
