@@ -8,12 +8,19 @@ public class BepisLoader
 {
     internal static string resoDir = string.Empty;
     internal static AssemblyLoadContext alc = null!;
+    internal static AssemblyDependencyResolver? resolver;
     static void Main(string[] args)
     {
         resoDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? AppContext.BaseDirectory;
         logPath = Path.Combine(resoDir, "BepisLoader.log");
         File.WriteAllText(logPath, string.Empty);
         Log("BepisLoader started");
+
+        // The Default ALC only probes BepisLoader.deps.json (no native entries), so resolve its native dependencies (e.g. System.Net.Quic loading libmsquic) via the game's deps.json.
+        var resoDllPath = GetResoDllPath();
+        if (File.Exists(resoDllPath))
+            resolver = new AssemblyDependencyResolver(resoDllPath);
+        AssemblyLoadContext.Default.ResolvingUnmanagedDll += ResolveDefaultUnmanagedDll;
 
         alc = new BepisLoadContext();
 
@@ -29,8 +36,6 @@ public class BepisLoader
         Log("Loading BepInEx from " + bepinPath);
 
         var asm = alc.LoadFromAssemblyPath(Path.Combine(bepinPath, "core", "BepInEx.NET.CoreCLR.dll"));
-
-        var resoDllPath = GetResoDllPath();
 
         var t = asm.GetType("StartupHook");
         var m = t.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static, [typeof(string), typeof(string), typeof(AssemblyLoadContext)]);
@@ -85,17 +90,41 @@ public class BepisLoader
         return File.Exists(path) ? path : Path.Combine(resoDir, "Resonite.dll");
     }
 
+    static IntPtr ResolveNativeLibrary(string libraryName, AssemblyDependencyResolver? resolver, Func<string, IntPtr> load)
+    {
+        Log($"Loading native library: {libraryName}");
+        string? libraryPath = resolver?.ResolveUnmanagedDllToPath(libraryName);
+        if (libraryPath == null)
+        {
+            Log($"Native library unresolved by deps.json, falling back to default load: {libraryName}");
+            return IntPtr.Zero;
+        }
+        try
+        {
+            var handle = load(libraryPath);
+            Log(handle != IntPtr.Zero
+                ? $"Native library loaded: {libraryName} -> {libraryPath} (0x{handle:X})"
+                : $"Native library load failed: {libraryName} -> {libraryPath}");
+            return handle;
+        }
+        catch (Exception ex)
+        {
+            Log($"Native library load threw: {libraryName} -> {libraryPath} ({ex.Message})");
+            throw;
+        }
+    }
+
+    static IntPtr ResolveDefaultUnmanagedDll(Assembly _, string libraryName)
+        => ResolveNativeLibrary(libraryName, resolver, NativeLibrary.Load);
+
     private class BepisLoadContext : AssemblyLoadContext
     {
         private readonly AssemblyDependencyResolver? _resolver;
 
         public BepisLoadContext() : base(isCollectible: false)
         {
-            var resoDllPath = GetResoDllPath();
-            Log($"Entry assembly: {resoDllPath} (RID: {RuntimeInformation.RuntimeIdentifier})");
-
-            if (File.Exists(resoDllPath))
-                _resolver = new AssemblyDependencyResolver(resoDllPath);
+            Log($"Entry assembly: {GetResoDllPath()} (RID: {RuntimeInformation.RuntimeIdentifier})");
+            _resolver = resolver;
         }
 
         protected override Assembly? Load(AssemblyName assemblyName)
@@ -111,28 +140,7 @@ public class BepisLoader
         }
 
         protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
-        {
-            Log($"Loading native library: {unmanagedDllName}");
-            string? libraryPath = _resolver?.ResolveUnmanagedDllToPath(unmanagedDllName);
-            if (libraryPath != null)
-            {
-                try
-                {
-                    var handle = LoadUnmanagedDllFromPath(libraryPath);
-                    Log(handle != IntPtr.Zero
-                        ? $"Native library loaded: {unmanagedDllName} -> {libraryPath} (0x{handle:X})"
-                        : $"Native library load failed: {unmanagedDllName} -> {libraryPath}");
-                    return handle;
-                }
-                catch (Exception ex)
-                {
-                    Log($"Native library load threw: {unmanagedDllName} -> {libraryPath} ({ex.Message})");
-                    throw;
-                }
-            }
-            Log($"Native library unresolved by deps.json, falling back to default load: {unmanagedDllName}");
-            return IntPtr.Zero;
-        }
+            => ResolveNativeLibrary(unmanagedDllName, _resolver, LoadUnmanagedDllFromPath);
     }
 
     private static string logPath = string.Empty;
