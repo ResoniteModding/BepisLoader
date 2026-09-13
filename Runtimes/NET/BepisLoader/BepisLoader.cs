@@ -111,11 +111,11 @@ public class BepisLoader
 
         protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
         {
-            Log("NativeLib " + unmanagedDllName);
+            Log($"Loading native library: {unmanagedDllName}");
             string? libraryPath = _resolver?.ResolveUnmanagedDllToPath(unmanagedDllName);
             if (libraryPath != null)
             {
-                Log("  Resolved: " + libraryPath);
+                Log($"Native library loaded: {unmanagedDllName} -> {libraryPath}");
                 return LoadUnmanagedDllFromPath(libraryPath);
             }
             return IntPtr.Zero;
@@ -131,7 +131,7 @@ public class BepisLoader
 #if DEBUG
         lock (_lock)
         {
-            File.AppendAllLines(logPath, [message]);
+            File.AppendAllLines(logPath, [$"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz} [BepisLoader] {message}"]);
         }
 #endif
     }
