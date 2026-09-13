@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Runtime.InteropServices;
 
 namespace BepisLoader;
 
@@ -9,11 +10,10 @@ public class BepisLoader
     internal static AssemblyLoadContext alc = null!;
     static void Main(string[] args)
     {
-        resoDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-#if DEBUG
+        resoDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? AppContext.BaseDirectory;
         logPath = Path.Combine(resoDir, "BepisLoader.log");
-        File.WriteAllText(logPath, "BepisLoader started\n");
-#endif
+        File.WriteAllText(logPath, string.Empty);
+        Log("BepisLoader started");
 
         alc = new BepisLoadContext();
 
@@ -92,6 +92,7 @@ public class BepisLoader
         public BepisLoadContext() : base(isCollectible: false)
         {
             var resoDllPath = GetResoDllPath();
+            Log($"Entry assembly: {resoDllPath} (RID: {RuntimeInformation.RuntimeIdentifier})");
 
             if (File.Exists(resoDllPath))
                 _resolver = new AssemblyDependencyResolver(resoDllPath);
@@ -115,24 +116,41 @@ public class BepisLoader
             string? libraryPath = _resolver?.ResolveUnmanagedDllToPath(unmanagedDllName);
             if (libraryPath != null)
             {
-                Log($"Native library loaded: {unmanagedDllName} -> {libraryPath}");
-                return LoadUnmanagedDllFromPath(libraryPath);
+                try
+                {
+                    var handle = LoadUnmanagedDllFromPath(libraryPath);
+                    Log(handle != IntPtr.Zero
+                        ? $"Native library loaded: {unmanagedDllName} -> {libraryPath} (0x{handle:X})"
+                        : $"Native library load failed: {unmanagedDllName} -> {libraryPath}");
+                    return handle;
+                }
+                catch (Exception ex)
+                {
+                    Log($"Native library load threw: {unmanagedDllName} -> {libraryPath} ({ex.Message})");
+                    throw;
+                }
             }
+            Log($"Native library unresolved by deps.json, falling back to default load: {unmanagedDllName}");
             return IntPtr.Zero;
         }
     }
 
-#if DEBUG
-    private static string logPath;
-    private static object _lock = new object();
-#endif
+    private static string logPath = string.Empty;
+    private static readonly object _lock = new object();
+    private static readonly HashSet<string> _loggedMessages = new(StringComparer.OrdinalIgnoreCase);
     public static void Log(string message)
     {
-#if DEBUG
-        lock (_lock)
+        try
         {
-            File.AppendAllLines(logPath, [$"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz} [BepisLoader] {message}"]);
+            lock (_lock)
+            {
+                if (!_loggedMessages.Add(message))
+                    return;
+                File.AppendAllLines(logPath, [$"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff zzz} [BepisLoader] {message}"]);
+            }
         }
-#endif
+        catch
+        {
+        }
     }
 }
