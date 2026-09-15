@@ -20,8 +20,6 @@ namespace BepInEx.Preloader.Core.Patching;
 /// </summary>
 public class AssemblyPatcher : IDisposable
 {
-    private static readonly string CurrentAssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
-
     private Func<byte[], string, Assembly> assemblyLoader;
 
     public AssemblyPatcher(Func<byte[], string, Assembly> assemblyLoader)
@@ -115,12 +113,11 @@ public class AssemblyPatcher : IDisposable
 
     private bool HasPatcherPlugins(AssemblyDefinition ass)
     {
-        if (ass.MainModule.AssemblyReferences.All(r => r.Name != CurrentAssemblyName) &&
-            ass.Name.Name != CurrentAssemblyName)
-            return false;
-        if (ass.MainModule.GetTypeReferences().All(r => r.FullName != typeof(BasePatcher).FullName))
-            return false;
-
+        var typeReferences = ass.MainModule.GetTypeReferences().ToList();
+        if (typeReferences.All(r => r.FullName != typeof(BasePatcher).FullName))
+        {
+            return typeReferences.Any(r => MetadataHelper.TypeInheretsFrom(r, typeof(BasePatcher)));
+        }
         return true;
     }
 
@@ -134,6 +131,8 @@ public class AssemblyPatcher : IDisposable
             return;
 
         var sortedPatchers = new List<PatchDefinition>();
+
+        TypeLoader.RegisterAssemblyPaths(directory);
 
         var patchers = TypeLoader.FindPluginTypes(directory, ToPatcherPlugin, HasPatcherPlugins);
 

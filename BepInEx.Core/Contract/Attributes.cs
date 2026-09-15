@@ -254,12 +254,27 @@ public static class MetadataHelper
 {
     internal static bool TypeInheretsFrom(TypeReference derived, Type type)
     {
-        var td = derived.Resolve();
+        TypeDefinition td;
+        try
+        {
+            td = derived.Resolve();
+        }
+        catch (AssemblyResolutionException)
+        {
+            return false;
+        }
         while (td != null)
         {
             if (td.FullName == type.FullName)
                 return true;
-            td = td.BaseType?.Resolve();
+            try
+            {
+                td = td.BaseType?.Resolve();
+            }
+            catch (AssemblyResolutionException)
+            {
+                return false;
+            }
         }
         return false;
     }

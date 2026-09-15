@@ -78,6 +78,15 @@ namespace BepInEx.NET.Shared
              || LocalUtility.TryResolveDllAssembly(assemblyName, Paths.PluginPath, out foundAssembly))
                 return foundAssembly;
 
+            if (Bootstrap.TypeLoader.TryGetRegisteredAssemblyPath(assemblyName.Name, out var mappedPath))
+            {
+                try
+                {
+                    return Utility.LoadContext.LoadFromAssemblyPath(mappedPath);
+                }
+                catch (Exception) { }
+            }
+
             return null;
         }
     }
