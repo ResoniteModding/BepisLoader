@@ -132,6 +132,8 @@ public class AssemblyPatcher : IDisposable
 
         var sortedPatchers = new List<PatchDefinition>();
 
+        TypeLoader.RegisterAssemblyPaths(directory);
+
         var patchers = TypeLoader.FindPluginTypes(directory, ToPatcherPlugin, HasPatcherPlugins);
 
         // TODO: Add dependency ordering and process attribute filtering

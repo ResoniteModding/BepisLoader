@@ -63,6 +63,38 @@ public static class TypeLoader
 
     public static HashSet<string> SearchDirectories = new();
 
+    private static readonly Dictionary<string, string> AssemblyPathByName = new(StringComparer.InvariantCultureIgnoreCase);
+
+    /// <summary>
+    ///     Maps every managed assembly file in a directory to its assembly name, so files whose
+    ///     filename does not match the assembly name (e.g. renamed by the user) still resolve.
+    ///     First file wins when two files share an assembly name.
+    /// </summary>
+    public static void RegisterAssemblyPaths(string directory)
+    {
+        if (!Directory.Exists(directory))
+            return;
+
+        foreach (var dll in Directory.GetFiles(Path.GetFullPath(directory), "*.dll", SearchOption.AllDirectories))
+        {
+            AssemblyName name;
+            try
+            {
+                name = AssemblyName.GetAssemblyName(dll);
+            }
+            catch (Exception)
+            {
+                continue;
+            }
+
+            if (!AssemblyPathByName.ContainsKey(name.Name))
+                AssemblyPathByName[name.Name] = dll;
+        }
+    }
+
+    public static bool TryGetRegisteredAssemblyPath(string name, out string path) =>
+        AssemblyPathByName.TryGetValue(name, out path) && File.Exists(path);
+
     #region Config
 
     private static readonly ConfigEntry<bool> EnableAssemblyCache = ConfigFile.CoreConfig.Bind(
@@ -102,6 +134,15 @@ public static class TypeLoader
 
             if (Utility.TryResolveDllAssembly(name, dir, ReaderParameters, out var assembly))
                 return assembly;
+        }
+
+        if (TryGetRegisteredAssemblyPath(name.Name, out var mappedPath))
+        {
+            try
+            {
+                return AssemblyDefinition.ReadAssembly(mappedPath, ReaderParameters);
+            }
+            catch (BadImageFormatException) { }
         }
 
         return AssemblyResolve?.Invoke(sender, reference);
