@@ -12,7 +12,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\..\BepInEx.Core\BepInEx.Core.csproj"/>
         <ProjectReference Include="..\..\..\BepInEx.Preloader.Core\BepInEx.Preloader.Core.csproj"/>
-        <ProjectReference Include="..\..\..\HarmonyX\Harmony\Harmony.csproj"/>
+        <ProjectReference Include="..\..\..\HarmonyX\Harmony\Harmony.csproj" SetTargetFramework="TargetFramework=netstandard2.0"/>
     </ItemGroup>
 
 </Project>
