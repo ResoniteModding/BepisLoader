@@ -101,7 +101,17 @@ public abstract class BaseChainloader<TPlugin>
 
         foreach (var r in ass.MainModule.AssemblyReferences)
         {
-            var dep = ass.MainModule.AssemblyResolver.Resolve(r);
+            AssemblyDefinition dep;
+            try
+            {
+                dep = ass.MainModule.AssemblyResolver.Resolve(r);
+            }
+            catch (AssemblyResolutionException ex)
+            {
+                // Dependency can't be resolved (e.g. framework facade like System.IO.Ports pulled in transitively via legacy libs). It can't reference this assembly, so skip the branch instead of failing discovery.
+                Logger.Log(LogLevel.Debug, $"Skipping unresolvable assembly reference '{r.FullName}' while checking '{ass.Name.FullName}': {ex.Message}");
+                continue;
+            }
             if (dep != null && ReferencesThisAssembly(dep, seen))
                 return RefCache[key] = true;
         }
