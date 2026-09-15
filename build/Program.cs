@@ -15,7 +15,6 @@ using Cake.Core;
 using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 using Cake.Frosting;
-using Cake.Git;
 using Cake.Json;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
@@ -126,12 +125,10 @@ public sealed class RestoreToolsTask : FrostingTask<BuildContext>
     {
         ctx.Log.Information("Restoring dotnet tools...");
 
-        var settings = new Cake.Common.Tools.DotNet.Tool.DotNetToolSettings
+        ctx.DotNetToolRestore(new Cake.Common.Tools.DotNet.Tool.DotNetToolRestoreSettings
         {
             WorkingDirectory = ctx.RootDirectory
-        };
-
-        ctx.DotNetTool("tool restore", settings);
+        });
 
         ctx.Log.Information("Dotnet tools restored successfully.");
     }
@@ -164,7 +161,7 @@ public sealed class CompileTask : FrostingTask<BuildContext>
             };
         }
 
-        ctx.DotNetBuild(ctx.RootDirectory.FullPath, buildSettings);
+        ctx.DotNetBuild(ctx.RootDirectory.CombineWithFilePath("BepInEx.slnx").FullPath, buildSettings);
 
         if (hasBepisLoader)
         {

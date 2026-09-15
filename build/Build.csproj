@@ -6,11 +6,9 @@
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Cake.Frosting" Version="5.0.0"/>
-        <PackageReference Include="Cake.Frosting.Git" Version="5.0.1"/>
-        <PackageReference Include="Cake.Incubator" Version="8.0.0"/>
-        <PackageReference Include="Cake.Json" Version="7.0.1"/>
-        <PackageReference Include="Microsoft.Build" Version="17.14.28"/>
+        <PackageReference Include="Cake.Frosting" Version="6.3.0"/>
+        <PackageReference Include="Cake.Json" Version="11.0.0"/>
+        <PackageReference Include="Microsoft.Build" Version="18.9.6"/>
     </ItemGroup>
     <ItemGroup>
         <Content Include="$(SolutionDir)/.github/workflows/*.yml" LinkBase="ci"/>
