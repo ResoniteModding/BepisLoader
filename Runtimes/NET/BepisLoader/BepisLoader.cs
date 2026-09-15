@@ -12,8 +12,23 @@ public class BepisLoader
     static void Main(string[] args)
     {
         resoDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? AppContext.BaseDirectory;
-        logPath = Path.Combine(resoDir, "BepisLoader.log");
-        File.WriteAllText(logPath, string.Empty);
+
+        var bepinPath = Path.Combine(resoDir, "BepInEx");
+        var bepinArg = Array.IndexOf(args.Select(x => x?.ToLowerInvariant()).ToArray(), "--bepinex-target");
+        if (bepinArg != -1 && args.Length > bepinArg + 1)
+        {
+            bepinPath = args[bepinArg + 1];
+        }
+
+        logPath = Path.Combine(bepinPath, "EntryPoint.log");
+        try
+        {
+            Directory.CreateDirectory(bepinPath);
+            File.WriteAllText(logPath, string.Empty);
+        }
+        catch
+        {
+        }
         Log("BepisLoader started");
 
         // The Default ALC only probes BepisLoader.deps.json (no native entries), so resolve its native dependencies (e.g. System.Net.Quic loading libmsquic) via the game's deps.json.
@@ -27,12 +42,6 @@ public class BepisLoader
         // The game runs in the Default AssemblyLoadContext, not our custom BepisLoadContext. When code in the Default ALC requests a dependency, BepisLoadContext.Load() is never called, only this global AssemblyResolve event fires as a fallback.
         AppDomain.CurrentDomain.AssemblyResolve += ResolveGameDll;
 
-        var bepinPath = Path.Combine(resoDir, "BepInEx");
-        var bepinArg = Array.IndexOf(args.Select(x => x?.ToLowerInvariant()).ToArray(), "--bepinex-target");
-        if (bepinArg != -1 && args.Length > bepinArg + 1)
-        {
-            bepinPath = args[bepinArg + 1];
-        }
         Log("Loading BepInEx from " + bepinPath);
 
         var asm = alc.LoadFromAssemblyPath(Path.Combine(bepinPath, "core", "BepInEx.NET.CoreCLR.dll"));
@@ -55,7 +64,8 @@ public class BepisLoader
         }
         catch (Exception e)
         {
-            File.WriteAllLines(Path.Combine(resoDir, "BepisCrash.log"), [DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " - Resonite crashed", e.ToString()]);
+            Log("Resonite crashed: " + e);
+            File.WriteAllLines(Path.Combine(bepinPath, "BepisCrash.log"), [DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " - Resonite crashed", e.ToString()]);
         }
     }
 
