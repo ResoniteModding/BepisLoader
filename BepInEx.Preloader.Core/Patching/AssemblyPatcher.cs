@@ -15,20 +15,21 @@ using Mono.Cecil;
 namespace BepInEx.Preloader.Core.Patching;
 
 /// <summary>
-///     Worker class which is used for loading and patching entire folders of assemblies, or alternatively patching and
-///     loading assemblies one at a time.
+/// Worker class which is used for loading and patching entire folders of assemblies, or alternatively patching and loading assemblies one at a time.
 /// </summary>
 public class AssemblyPatcher : IDisposable
 {
     private Func<byte[], string, Assembly> assemblyLoader;
 
+    /// <summary>Creates a new assembly patcher.</summary>
+    /// <param name="assemblyLoader">Loader used to load patched assemblies.</param>
     public AssemblyPatcher(Func<byte[], string, Assembly> assemblyLoader)
     {
         this.assemblyLoader = assemblyLoader;
     }
 
     /// <summary>
-    ///     The context of this assembly patcher instance that is passed to all patcher plugins.
+    /// The context of this assembly patcher instance that is passed to all patcher plugins.
     /// </summary>
     public PatcherContext PatcherContext { get; } = new()
     {
@@ -36,8 +37,7 @@ public class AssemblyPatcher : IDisposable
     };
 
     /// <summary>
-    ///     A cloned version of <see cref="PatcherPlugins" /> to ensure that any foreach loops do not break when the collection
-    ///     gets modified.
+    /// A cloned version of <see cref="PatcherContext.PatcherPlugins" /> to ensure that any foreach loops do not break when the collection gets modified.
     /// </summary>
     private IEnumerable<BasePatcher> PatcherPluginsSafe => PatcherContext.PatcherPlugins.ToList();
 
@@ -46,7 +46,7 @@ public class AssemblyPatcher : IDisposable
     private static Regex allowedGuidRegex { get; } = new(@"^[a-zA-Z0-9\._\-]+$");
 
     /// <summary>
-    ///     Performs work to dispose collection objects.
+    /// Performs work to dispose collection objects.
     /// </summary>
     public void Dispose()
     {
@@ -122,7 +122,7 @@ public class AssemblyPatcher : IDisposable
     }
 
     /// <summary>
-    ///     Adds all patchers from all managed assemblies specified in a directory.
+    /// Adds all patchers from all managed assemblies specified in a directory.
     /// </summary>
     /// <param name="directory">Directory to search patcher DLLs from.</param>
     public void AddPatchersFromDirectory(string directory)
@@ -222,18 +222,14 @@ public class AssemblyPatcher : IDisposable
 
 
     /// <summary>
-    ///     Adds all .dll assemblies in given directories to be patched and loaded by this patcher instance. Non-managed
-    ///     assemblies
-    ///     are skipped.
+    /// Adds all .dll assemblies in given directories to be patched and loaded by this patcher instance. Non-managed assemblies are skipped.
     /// </summary>
     /// <param name="directories">The directories to search.</param>
     public void LoadAssemblyDirectories(params string[] directories) =>
         LoadAssemblyDirectories(directories, new[] { "dll" });
 
     /// <summary>
-    ///     Adds all assemblies in given directories to be patched and loaded by this patcher instance. Non-managed assemblies
-    ///     are
-    ///     skipped.
+    /// Adds all assemblies in given directories to be patched and loaded by this patcher instance. Non-managed assemblies are skipped.
     /// </summary>
     /// <param name="directories">The directory to search.</param>
     /// <param name="assemblyExtensions">The file extensions to attempt to load.</param>
@@ -277,7 +273,7 @@ public class AssemblyPatcher : IDisposable
     }
 
     /// <summary>
-    ///     Attempts to load a managed assembly as an <see cref="AssemblyDefinition" />. Returns true if successful.
+    /// Attempts to load a managed assembly as an <see cref="AssemblyDefinition" />. Returns true if successful.
     /// </summary>
     /// <param name="path">The path of the assembly.</param>
     /// <param name="assembly">The loaded assembly. Null if not successful in loading.</param>
@@ -297,7 +293,7 @@ public class AssemblyPatcher : IDisposable
     }
 
     /// <summary>
-    ///     Applies patchers to all assemblies loaded into this assembly patcher and then loads patched assemblies into memory.
+    /// Applies patchers to all assemblies loaded into this assembly patcher and then loads patched assemblies into memory.
     /// </summary>
     public void PatchAndLoad()
     {

@@ -12,15 +12,18 @@ using Mono.Cecil;
 
 namespace BepInEx.Bootstrap;
 
+/// <summary>Base chainloader used to load and manage plugins.</summary>
 public abstract class BaseChainloader<TPlugin>
 {
+    /// <summary>Name of the currently executing BepInEx assembly.</summary>
     protected static readonly string CurrentAssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+    /// <summary>Version of the currently executing BepInEx assembly.</summary>
     protected static readonly Version CurrentAssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
     private static readonly Dictionary<string, bool> RefCache = new();
     private static Regex allowedGuidRegex { get; } = new(@"^[a-zA-Z0-9\._\-]+$");
 
     /// <summary>
-    ///     Analyzes the given type definition and attempts to convert it to a valid <see cref="PluginInfo" />
+    /// Analyzes the given type definition and attempts to convert it to a valid <see cref="PluginInfo" />
     /// </summary>
     /// <param name="type">Type definition to analyze.</param>
     /// <param name="assemblyLocation">The filepath of the assembly, to keep as metadata.</param>
@@ -117,6 +120,9 @@ public abstract class BaseChainloader<TPlugin>
         }
         return RefCache[key] = false;
     }
+    /// <summary>Checks whether the assembly contains loadable plugins.</summary>
+    /// <param name="ass">Assembly definition to check.</param>
+    /// <returns>True if the assembly references BepInEx and contains plugin types, otherwise false.</returns>
     protected static bool HasBepinPlugins(AssemblyDefinition ass)
     {
         if (!ReferencesThisAssembly(ass))
@@ -129,6 +135,9 @@ public abstract class BaseChainloader<TPlugin>
         return true;
     }
 
+    /// <summary>Checks whether the plugin targets an incompatible BepInEx version.</summary>
+    /// <param name="pluginInfo">Plugin metadata to check.</param>
+    /// <returns>True if the plugin targets a different BepInEx version, otherwise false.</returns>
     protected static bool PluginTargetsWrongBepin(PluginInfo pluginInfo)
     {
         var pluginTarget = pluginInfo.TargettedBepInExVersion;
@@ -141,31 +150,34 @@ public abstract class BaseChainloader<TPlugin>
 
     #region Contract
 
+    /// <summary>Title displayed on the BepInEx console window.</summary>
     protected virtual string ConsoleTitle => $"BepInEx {Utility.BepInExVersion} - {Paths.ProcessName}";
 
     private bool _initialized;
 
     /// <summary>
-    ///     List of all <see cref="PluginInfo" /> instances loaded via the chainloader.
+    /// List of all <see cref="PluginInfo" /> instances loaded via the chainloader.
     /// </summary>
     public Dictionary<string, PluginInfo> Plugins { get; } = new();
 
     /// <summary>
-    ///     Collection of error chainloader messages that occured during plugin loading.
-    ///     Contains information about what certain plugins were not loaded.
+    /// Collection of error chainloader messages that occured during plugin loading.
+    /// Contains information about what certain plugins were not loaded.
     /// </summary>
     public List<string> DependencyErrors { get; } = new();
 
     /// <summary>
-    ///     Occurs after a plugin is loaded.
+    /// Occurs after a plugin is loaded.
     /// </summary>
     public event Action<PluginInfo> PluginLoaded;
 
     /// <summary>
-    ///     Occurs after all plugins are loaded.
+    /// Occurs after all plugins are loaded.
     /// </summary>
     public event Action Finished;
 
+    /// <summary>Initializes the chainloader and loads all plugins.</summary>
+    /// <param name="gameExePath">Path to the game executable. If null, paths must already be initialized.</param>
     public virtual void Initialize(string gameExePath = null)
     {
         if (_initialized)
@@ -190,6 +202,7 @@ public abstract class BaseChainloader<TPlugin>
         Logger.Log(LogLevel.Message, "Chainloader initialized");
     }
 
+    /// <summary>Initializes the console and disk loggers.</summary>
     protected virtual void InitializeLoggers()
     {
         if (ConsoleManager.ConsoleEnabled && !ConsoleManager.ConsoleActive)
@@ -550,6 +563,10 @@ public abstract class BaseChainloader<TPlugin>
         }
     }
 
+    /// <summary>Loads a plugin from the given assembly.</summary>
+    /// <param name="pluginInfo">Metadata of the plugin to load.</param>
+    /// <param name="pluginAssembly">Assembly containing the plugin.</param>
+    /// <returns>The loaded plugin instance.</returns>
     public abstract TPlugin LoadPlugin(PluginInfo pluginInfo, Assembly pluginAssembly);
 
     #endregion

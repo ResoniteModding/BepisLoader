@@ -6,11 +6,13 @@ using HarmonyLib;
 
 namespace BepInEx.Preloader.RuntimeFixes;
 
+/// <summary>Redirects console output to the BepInEx log.</summary>
 public static class ConsoleSetOutFix
 {
     private static LoggedTextWriter loggedTextWriter;
     internal static ManualLogSource ConsoleLogSource = Logger.CreateLogSource("Console");
 
+    /// <summary>Replaces the console output writer with a logging writer.</summary>
     public static void Apply()
     {
         loggedTextWriter = new LoggedTextWriter { Parent = Console.Out };

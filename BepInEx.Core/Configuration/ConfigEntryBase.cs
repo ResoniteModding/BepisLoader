@@ -6,7 +6,7 @@ using BepInEx.Logging;
 namespace BepInEx.Configuration;
 
 /// <summary>
-///     Provides access to a single setting inside of a <see cref="Configuration.ConfigFile" />.
+/// Provides access to a single setting inside of a <see cref="Configuration.ConfigFile" />.
 /// </summary>
 /// <typeparam name="T">Type of the setting.</typeparam>
 public sealed class ConfigEntry<T> : ConfigEntryBase
@@ -26,7 +26,7 @@ public sealed class ConfigEntry<T> : ConfigEntryBase
     }
 
     /// <summary>
-    ///     Value of this setting.
+    /// Value of this setting.
     /// </summary>
     public T Value
     {
@@ -50,19 +50,19 @@ public sealed class ConfigEntry<T> : ConfigEntryBase
     }
 
     /// <summary>
-    ///     Fired when the setting is changed. Does not detect changes made outside from this object.
+    /// Fired when the setting is changed. Does not detect changes made outside from this object.
     /// </summary>
     public event EventHandler SettingChanged;
 }
 
 /// <summary>
-///     Container for a single setting of a <see cref="Configuration.ConfigFile" />.
-///     Each config entry is linked to one config file.
+/// Container for a single setting of a <see cref="Configuration.ConfigFile" />.
+/// Each config entry is linked to one config file.
 /// </summary>
 public abstract class ConfigEntryBase
 {
     /// <summary>
-    ///     Types of defaultValue and definition.AcceptableValues have to be the same as settingType.
+    /// Types of defaultValue and definition.AcceptableValues have to be the same as settingType.
     /// </summary>
     internal protected ConfigEntryBase(ConfigFile configFile,
                              ConfigDefinition definition,
@@ -87,43 +87,43 @@ public abstract class ConfigEntryBase
     }
 
     /// <summary>
-    ///     Config file this entry is a part of.
+    /// Config file this entry is a part of.
     /// </summary>
     public ConfigFile ConfigFile { get; }
 
     /// <summary>
-    ///     Category and name of this setting. Used as a unique key for identification within a
-    ///     <see cref="Configuration.ConfigFile" />.
+    /// Category and name of this setting. Used as a unique key for identification within a
+    /// <see cref="Configuration.ConfigFile" />.
     /// </summary>
     public ConfigDefinition Definition { get; }
 
     /// <summary>
-    ///     Description / metadata of this setting.
+    /// Description / metadata of this setting.
     /// </summary>
     public ConfigDescription Description { get; }
 
     /// <summary>
-    ///     Type of the <see cref="BoxedValue" /> that this setting holds.
+    /// Type of the <see cref="BoxedValue" /> that this setting holds.
     /// </summary>
     public Type SettingType { get; }
 
     /// <summary>
-    ///     Default value of this setting (set only if the setting was not changed before).
+    /// Default value of this setting (set only if the setting was not changed before).
     /// </summary>
     public object DefaultValue { get; }
 
     /// <summary>
-    ///     Get or set the value of the setting.
+    /// Get or set the value of the setting.
     /// </summary>
     public abstract object BoxedValue { get; set; }
 
     /// <summary>
-    ///     Get the serialized representation of the value.
+    /// Get the serialized representation of the value.
     /// </summary>
     public string GetSerializedValue() => TomlTypeConverter.ConvertToString(BoxedValue, SettingType);
 
     /// <summary>
-    ///     Set the value by using its serialized form.
+    /// Set the value by using its serialized form.
     /// </summary>
     public void SetSerializedValue(string value)
     {
@@ -140,7 +140,7 @@ public abstract class ConfigEntryBase
     }
 
     /// <summary>
-    ///     If necessary, clamp the value to acceptable value range. T has to be equal to settingType.
+    /// If necessary, clamp the value to acceptable value range. T has to be equal to settingType.
     /// </summary>
     protected T ClampValue<T>(T value)
     {
@@ -150,12 +150,12 @@ public abstract class ConfigEntryBase
     }
 
     /// <summary>
-    ///     Trigger setting changed event.
+    /// Trigger setting changed event.
     /// </summary>
     protected void OnSettingChanged(object sender) => ConfigFile.OnSettingChanged(sender, this);
 
     /// <summary>
-    ///     Write a description of this setting using all available metadata.
+    /// Write a description of this setting using all available metadata.
     /// </summary>
     public void WriteDescription(StreamWriter writer)
     {

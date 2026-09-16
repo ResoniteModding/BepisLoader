@@ -8,7 +8,7 @@ using BepInEx.Logging;
 namespace BepInEx.Configuration;
 
 /// <summary>
-///     Serializer/deserializer used by the config system.
+/// Serializer/deserializer used by the config system.
 /// </summary>
 public static class TomlTypeConverter
 {
@@ -103,7 +103,7 @@ public static class TomlTypeConverter
     };
 
     /// <summary>
-    ///     Convert object of a given type to a string using available converters.
+    /// Convert object of a given type to a string using available converters.
     /// </summary>
     public static string ConvertToString(object value, Type valueType)
     {
@@ -115,12 +115,12 @@ public static class TomlTypeConverter
     }
 
     /// <summary>
-    ///     Convert string to an object of a given type using available converters.
+    /// Convert string to an object of a given type using available converters.
     /// </summary>
     public static T ConvertToValue<T>(string value) => (T) ConvertToValue(value, typeof(T));
 
     /// <summary>
-    ///     Convert string to an object of a given type using available converters.
+    /// Convert string to an object of a given type using available converters.
     /// </summary>
     public static object ConvertToValue(string value, Type valueType)
     {
@@ -132,7 +132,7 @@ public static class TomlTypeConverter
     }
 
     /// <summary>
-    ///     Get a converter for a given type if there is any.
+    /// Get a converter for a given type if there is any.
     /// </summary>
     public static TypeConverter GetConverter(Type valueType)
     {
@@ -148,8 +148,8 @@ public static class TomlTypeConverter
     }
 
     /// <summary>
-    ///     Add a new type converter for a given type.
-    ///     If a different converter is already added, this call is ignored and false is returned.
+    /// Add a new type converter for a given type.
+    /// If a different converter is already added, this call is ignored and false is returned.
     /// </summary>
     public static bool AddConverter(Type type, TypeConverter converter)
     {
@@ -167,12 +167,12 @@ public static class TomlTypeConverter
     }
 
     /// <summary>
-    ///     Check if a given type can be converted to and from string.
+    /// Check if a given type can be converted to and from string.
     /// </summary>
     public static bool CanConvert(Type type) => GetConverter(type) != null;
 
     /// <summary>
-    ///     Give a list of types with registered converters.
+    /// Give a list of types with registered converters.
     /// </summary>
     public static IEnumerable<Type> GetSupportedTypes() => TypeConverters.Keys;
 

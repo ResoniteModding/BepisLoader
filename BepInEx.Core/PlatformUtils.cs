@@ -106,7 +106,7 @@ internal static class PlatformUtils
     }
 
     /// <summary>
-    ///     Recreation of MonoMod's PlatformHelper.DeterminePlatform method, but with libc calls instead of creating processes.
+    /// Recreation of MonoMod's PlatformHelper.DeterminePlatform method, but with libc calls instead of creating processes.
     /// </summary>
     public static void SetPlatform()
     {

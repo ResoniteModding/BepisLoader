@@ -5,10 +5,14 @@ using Mono.Cecil;
 namespace BepInEx.Preloader.Core.Patching;
 
 /// <summary>
-///     A definition of an individual patch for use by <see cref="AssemblyPatcher" />.
+/// A definition of an individual patch for use by <see cref="AssemblyPatcher" />.
 /// </summary>
 public class PatchDefinition
 {
+    /// <summary>Creates a new patch definition for the given target assemblies.</summary>
+    /// <param name="targetAssembly">Attribute describing the targeted assemblies.</param>
+    /// <param name="instance">Patcher instance that owns the patch method.</param>
+    /// <param name="methodInfo">Patch method to invoke.</param>
     public PatchDefinition(TargetAssemblyAttribute targetAssembly, BasePatcher instance, MethodInfo methodInfo)
     {
         TargetAssembly = targetAssembly;
@@ -18,6 +22,10 @@ public class PatchDefinition
         FullName = $"{MethodInfo.DeclaringType.FullName}/{MethodInfo.Name} -> {TargetAssembly.TargetAssembly}";
     }
 
+    /// <summary>Creates a new patch definition for the given target type.</summary>
+    /// <param name="targetType">Attribute describing the targeted type.</param>
+    /// <param name="instance">Patcher instance that owns the patch method.</param>
+    /// <param name="methodInfo">Patch method to invoke.</param>
     public PatchDefinition(TargetTypeAttribute targetType, BasePatcher instance, MethodInfo methodInfo)
     {
         TargetType = targetType;
@@ -29,75 +37,71 @@ public class PatchDefinition
     }
 
     /// <summary>
-    ///     The assembly / assemblies this patch will target, if there any.
+    /// The assembly / assemblies this patch will target, if there any.
     /// </summary>
     public TargetAssemblyAttribute TargetAssembly { get; }
 
     /// <summary>
-    ///     The type / types this patch will target, if there are any.
+    /// The type / types this patch will target, if there are any.
     /// </summary>
     public TargetTypeAttribute TargetType { get; }
 
     /// <summary>
-    ///     The instance of the <see cref="BasePatcher" /> this <see cref="PatchDefinition" /> originates from.
+    /// The instance of the <see cref="BasePatcher" /> this <see cref="PatchDefinition" /> originates from.
     /// </summary>
     public BasePatcher Instance { get; }
 
     /// <summary>
-    ///     The method that will perform the patching logic defined by this <see cref="PatchDefinition" /> instance.
+    /// The method that will perform the patching logic defined by this <see cref="PatchDefinition" /> instance.
     /// </summary>
     public MethodInfo MethodInfo { get; }
 
     /// <summary>
-    ///     A friendly name for this patch definition, for use in logging and error tracking.
+    /// A friendly name for this patch definition, for use in logging and error tracking.
     /// </summary>
     public string FullName { get; }
 }
 
 /// <summary>
-///     Context provided to patcher plugins from the associated patcher engine.
+/// Context provided to patcher plugins from the associated patcher engine.
 /// </summary>
 public class PatcherContext
 {
     /// <summary>
-    ///     <para>Contains a list of assemblies that will be patched and loaded into the runtime.</para>
-    ///     <para>
-    ///         The dictionary has the name of the file, without any directories. These are used by the dumping
-    ///         functionality, and as such, these are also required to be unique. They do not have to be exactly the same as
-    ///         the real filename, however they have to be mapped deterministically.
-    ///     </para>
-    ///     <para>Order is not respected, as it will be sorted by dependencies.</para>
+    /// <para>Contains a list of assemblies that will be patched and loaded into the runtime.</para>
+    /// <para>
+    /// The dictionary has the name of the file, without any directories. These are used by the dumping functionality, and as such, these are also required to be unique. They do not have to be exactly the same as the real filename, however they have to be mapped deterministically.
+    /// </para>
+    /// <para>Order is not respected, as it will be sorted by dependencies.</para>
     /// </summary>
     public Dictionary<string, AssemblyDefinition> AvailableAssemblies { get; } = new();
 
     /// <summary>
-    ///     <para>Contains a mapping of available assembly name to their original filenames.</para>
+    /// <para>Contains a mapping of available assembly name to their original filenames.</para>
     /// </summary>
     public Dictionary<string, string> AvailableAssembliesPaths { get; } = new();
 
     /// <summary>
-    ///     <para>Contains a dictionary of assemblies that have been loaded as part of executing this assembly patcher.</para>
-    ///     <para>
-    ///         The key is the same key as used in <see cref="LoadedAssemblies" />, while the value is the actual assembly
-    ///         itself.
-    ///     </para>
+    /// <para>Contains a dictionary of assemblies that have been loaded as part of executing this assembly patcher.</para>
+    /// <para>
+    /// The key is the same key as used in <see cref="LoadedAssemblies" />, while the value is the actual assembly itself.
+    /// </para>
     /// </summary>
     public Dictionary<string, Assembly> LoadedAssemblies { get; } = new();
 
     /// <summary>
-    ///     A list of plugins that will be initialized and executed, in the order of the list.
+    /// A list of plugins that will be initialized and executed, in the order of the list.
     /// </summary>
     public List<BasePatcher> PatcherPlugins { get; } = new();
 
     /// <summary>
-    ///     A list of individual patches that <see cref="AssemblyPatcher" /> will execute, generated by parsing
-    ///     <see cref="PatcherPlugins" />.
+    /// A list of individual patches that <see cref="AssemblyPatcher" /> will execute, generated by parsing
+    /// <see cref="PatcherPlugins" />.
     /// </summary>
     public List<PatchDefinition> PatchDefinitions { get; } = new();
 
     /// <summary>
-    ///     The directory location as to where patched assemblies will be saved to and loaded from disk, for debugging
-    ///     purposes. Defaults to BepInEx/DumpedAssemblies/<ProcessName>
+    /// The directory location as to where patched assemblies will be saved to and loaded from disk, for debugging purposes. Defaults to BepInEx/DumpedAssemblies/&lt;ProcessName&gt;
     /// </summary>
     public string DumpedAssembliesPath { get; internal set; }
 }

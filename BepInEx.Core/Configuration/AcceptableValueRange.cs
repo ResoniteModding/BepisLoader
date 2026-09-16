@@ -3,7 +3,7 @@
 namespace BepInEx.Configuration;
 
 /// <summary>
-///     Specify the range of acceptable values for a setting.
+/// Specify the range of acceptable values for a setting.
 /// </summary>
 public class AcceptableValueRange<T> : AcceptableValueBase where T : IComparable
 {
@@ -23,12 +23,12 @@ public class AcceptableValueRange<T> : AcceptableValueBase where T : IComparable
     }
 
     /// <summary>
-    ///     Lowest acceptable value
+    /// Lowest acceptable value
     /// </summary>
     public virtual T MinValue { get; }
 
     /// <summary>
-    ///     Highest acceptable value
+    /// Highest acceptable value
     /// </summary>
     public virtual T MaxValue { get; }
 

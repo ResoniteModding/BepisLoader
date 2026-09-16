@@ -4,9 +4,9 @@ using System.Linq;
 namespace BepInEx.Configuration;
 
 /// <summary>
-///     Section and key of a setting. Used as a unique key for identification within a
-///     <see cref="T:BepInEx.Configuration.ConfigFile" />.
-///     The same definition can be used in multiple config files, it will point to different settings then.
+/// Section and key of a setting. Used as a unique key for identification within a
+/// <see cref="T:BepInEx.Configuration.ConfigFile" />.
+/// The same definition can be used in multiple config files, it will point to different settings then.
 /// </summary>
 /// <inheritdoc />
 public class ConfigDefinition : IEquatable<ConfigDefinition>
@@ -14,7 +14,7 @@ public class ConfigDefinition : IEquatable<ConfigDefinition>
     private static readonly char[] _invalidConfigChars = { '=', '\n', '\t', '\\', '"', '\'', '[', ']' };
 
     /// <summary>
-    ///     Create a new definition. Definitions with same section and key are equal.
+    /// Create a new definition. Definitions with same section and key are equal.
     /// </summary>
     /// <param name="section">Group of the setting, case sensitive.</param>
     /// <param name="key">Name of the setting, case sensitive.</param>
@@ -35,17 +35,17 @@ public class ConfigDefinition : IEquatable<ConfigDefinition>
     }
 
     /// <summary>
-    ///     Group of the setting. All settings within a config file are grouped by this.
+    /// Group of the setting. All settings within a config file are grouped by this.
     /// </summary>
     public string Section { get; }
 
     /// <summary>
-    ///     Name of the setting.
+    /// Name of the setting.
     /// </summary>
     public string Key { get; }
 
     /// <summary>
-    ///     Check if the definitions are the same.
+    /// Check if the definitions are the same.
     /// </summary>
     /// <inheritdoc />
     public bool Equals(ConfigDefinition other)
@@ -68,7 +68,7 @@ public class ConfigDefinition : IEquatable<ConfigDefinition>
     }
 
     /// <summary>
-    ///     Check if the definitions are the same.
+    /// Check if the definitions are the same.
     /// </summary>
     public override bool Equals(object obj)
     {
@@ -92,12 +92,12 @@ public class ConfigDefinition : IEquatable<ConfigDefinition>
     }
 
     /// <summary>
-    ///     Check if the definitions are the same.
+    /// Check if the definitions are the same.
     /// </summary>
     public static bool operator ==(ConfigDefinition left, ConfigDefinition right) => Equals(left, right);
 
     /// <summary>
-    ///     Check if the definitions are the same.
+    /// Check if the definitions are the same.
     /// </summary>
     public static bool operator !=(ConfigDefinition left, ConfigDefinition right) => !Equals(left, right);
 

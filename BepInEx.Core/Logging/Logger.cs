@@ -7,7 +7,7 @@ using BepInEx.Core.Logging.Interpolation;
 namespace BepInEx.Logging;
 
 /// <summary>
-///     Handles pub-sub event marshalling across all log listeners and sources.
+/// Handles pub-sub event marshalling across all log listeners and sources.
 /// </summary>
 public static class Logger
 {
@@ -24,17 +24,17 @@ public static class Logger
     }
 
     /// <summary>
-    ///     Log levels that are currently listened to by at least one listener.
+    /// Log levels that are currently listened to by at least one listener.
     /// </summary>
     public static LogLevel ListenedLogLevels => listeners.ActiveLogLevels;
 
     /// <summary>
-    ///     Collection of all log listeners that receive log events.
+    /// Collection of all log listeners that receive log events.
     /// </summary>
     public static ICollection<ILogListener> Listeners => listeners;
 
     /// <summary>
-    ///     Collection of all log source that output log events.
+    /// Collection of all log source that output log events.
     /// </summary>
     public static ICollection<ILogSource> Sources { get; }
 
@@ -44,14 +44,14 @@ public static class Logger
     }
 
     /// <summary>
-    ///     Logs an entry to the internal logger instance.
+    /// Logs an entry to the internal logger instance.
     /// </summary>
     /// <param name="level">The level of the entry.</param>
     /// <param name="data">The data of the entry.</param>
     internal static void Log(LogLevel level, object data) => InternalLogSource.Log(level, data);
 
     /// <summary>
-    ///     Logs an entry to the internal logger instance if any log listener wants the message.
+    /// Logs an entry to the internal logger instance if any log listener wants the message.
     /// </summary>
     /// <param name="level">The level of the entry.</param>
     /// <param name="logHandler">Log handler to resolve log from.</param>
@@ -61,7 +61,7 @@ public static class Logger
         InternalLogSource.Log(level, logHandler);
 
     /// <summary>
-    ///     Creates a new log source with a name and attaches it to <see cref="Sources" />.
+    /// Creates a new log source with a name and attaches it to <see cref="Sources" />.
     /// </summary>
     /// <param name="sourceName">Name of the log source to create.</param>
     /// <returns>An instance of <see cref="ManualLogSource" /> that allows to write logs.</returns>

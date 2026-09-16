@@ -11,64 +11,64 @@ using Mono.Cecil;
 namespace BepInEx.Bootstrap;
 
 /// <summary>
-///     A cacheable metadata item. Can be used with <see cref="TypeLoader.LoadAssemblyCache{T}" /> and
-///     <see cref="TypeLoader.SaveAssemblyCache{T}" /> to cache plugin metadata.
+/// A cacheable metadata item. Can be used with <see cref="TypeLoader.LoadAssemblyCache{T}" /> and
+/// <see cref="TypeLoader.SaveAssemblyCache{T}" /> to cache plugin metadata.
 /// </summary>
 public interface ICacheable
 {
     /// <summary>
-    ///     Serialize the object into a binary format.
+    /// Serialize the object into a binary format.
     /// </summary>
     /// <param name="bw"></param>
     void Save(BinaryWriter bw);
 
     /// <summary>
-    ///     Loads the object from binary format.
+    /// Loads the object from binary format.
     /// </summary>
     /// <param name="br"></param>
     void Load(BinaryReader br);
 }
 
 /// <summary>
-///     A cached assembly.
+/// A cached assembly.
 /// </summary>
 /// <typeparam name="T"></typeparam>
 public class CachedAssembly<T> where T : ICacheable
 {
     /// <summary>
-    ///     List of cached items inside the assembly.
+    /// List of cached items inside the assembly.
     /// </summary>
     public List<T> CacheItems { get; set; }
 
     /// <summary>
-    ///     Hash of the assembly. Used to verify that the assembly hasn't been changed.
+    /// Hash of the assembly. Used to verify that the assembly hasn't been changed.
     /// </summary>
     public string Hash { get; set; }
 }
 
 /// <summary>
-///     Provides methods for loading specified types from an assembly.
+/// Provides methods for loading specified types from an assembly.
 /// </summary>
 public static class TypeLoader
 {
     /// <summary>
-    ///     Default assembly resolved used by the <see cref="TypeLoader" />
+    /// Default assembly resolved used by the <see cref="TypeLoader" />
     /// </summary>
     public static readonly DefaultAssemblyResolver CecilResolver;
 
     /// <summary>
-    ///     Default reader parameters used by <see cref="TypeLoader" />
+    /// Default reader parameters used by <see cref="TypeLoader" />
     /// </summary>
     public static readonly ReaderParameters ReaderParameters;
 
+    /// <summary>Additional directories searched when resolving assemblies.</summary>
     public static HashSet<string> SearchDirectories = new();
 
     private static readonly Dictionary<string, string> AssemblyPathByName = new(StringComparer.InvariantCultureIgnoreCase);
 
     /// <summary>
-    ///     Maps every managed assembly file in a directory to its assembly name, so files whose
-    ///     filename does not match the assembly name (e.g. renamed by the user) still resolve.
-    ///     First file wins when two files share an assembly name.
+    /// Maps every managed assembly file in a directory to its assembly name, so files whose filename does not match the assembly name (e.g. renamed by the user) still resolve.
+    /// First file wins when two files share an assembly name.
     /// </summary>
     public static void RegisterAssemblyPaths(string directory)
     {
@@ -92,6 +92,10 @@ public static class TypeLoader
         }
     }
 
+    /// <summary>Tries to get the registered file path of an assembly.</summary>
+    /// <param name="name">Name of the assembly to look up.</param>
+    /// <param name="path">File path of the assembly, if registered.</param>
+    /// <returns>True if the assembly path was found and exists, otherwise false.</returns>
     public static bool TryGetRegisteredAssemblyPath(string name, out string path) =>
         AssemblyPathByName.TryGetValue(name, out path) && File.Exists(path);
 
@@ -112,6 +116,10 @@ public static class TypeLoader
         CecilResolver.ResolveFailure += CecilResolveOnFailure;
     }
 
+    /// <summary>Resolves Cecil assembly references that failed the default resolution.</summary>
+    /// <param name="sender">Source of the event.</param>
+    /// <param name="reference">Reference of the assembly that failed to resolve.</param>
+    /// <returns>The resolved assembly definition, or null if it could not be resolved.</returns>
     public static AssemblyDefinition CecilResolveOnFailure(object sender, AssemblyNameReference reference)
     {
         if (!Utility.TryParseAssemblyName(reference.FullName, out var name))
@@ -149,12 +157,12 @@ public static class TypeLoader
     }
 
     /// <summary>
-    ///     Event fired when <see cref="TypeLoader" /> fails to resolve a type during type loading.
+    /// Event fired when <see cref="TypeLoader" /> fails to resolve a type during type loading.
     /// </summary>
     public static event AssemblyResolveEventHandler AssemblyResolve;
 
     /// <summary>
-    ///     Looks up assemblies in the given directory and locates all types that can be loaded and collects their metadata.
+    /// Looks up assemblies in the given directory and locates all types that can be loaded and collects their metadata.
     /// </summary>
     /// <typeparam name="T">The specific base type to search for.</typeparam>
     /// <param name="directory">The directory to search for assemblies.</param>
@@ -162,8 +170,7 @@ public static class TypeLoader
     /// <param name="assemblyFilter">A filter function to quickly determine if the assembly can be loaded.</param>
     /// <param name="cacheName">The name of the cache to get cached types from.</param>
     /// <returns>
-    ///     A dictionary of all assemblies in the directory and the list of type metadatas of types that match the
-    ///     selector.
+    /// A dictionary of all assemblies in the directory and the list of type metadatas of types that match the selector.
     /// </returns>
     public static Dictionary<string, List<T>> FindPluginTypes<T>(string directory,
                                                                  Func<TypeDefinition, string, T> typeSelector,
@@ -224,13 +231,12 @@ public static class TypeLoader
     }
 
     /// <summary>
-    ///     Loads an index of type metadatas from a cache.
+    /// Loads an index of type metadatas from a cache.
     /// </summary>
     /// <param name="cacheName">Name of the cache</param>
     /// <typeparam name="T">Cacheable item</typeparam>
     /// <returns>
-    ///     Cached type metadatas indexed by the path of the assembly that defines the type. If no cache is defined,
-    ///     return null.
+    /// Cached type metadatas indexed by the path of the assembly that defines the type. If no cache is defined, return null.
     /// </returns>
     public static Dictionary<string, CachedAssembly<T>> LoadAssemblyCache<T>(string cacheName)
         where T : ICacheable, new()
@@ -277,7 +283,7 @@ public static class TypeLoader
     }
 
     /// <summary>
-    ///     Saves indexed type metadata into a cache.
+    /// Saves indexed type metadata into a cache.
     /// </summary>
     /// <param name="cacheName">Name of the cache</param>
     /// <param name="entries">List of plugin metadatas indexed by the path to the assembly that contains the types</param>
@@ -319,7 +325,7 @@ public static class TypeLoader
     }
 
     /// <summary>
-    ///     Converts TypeLoadException to a readable string.
+    /// Converts TypeLoadException to a readable string.
     /// </summary>
     /// <param name="ex">TypeLoadException</param>
     /// <returns>Readable representation of the exception</returns>

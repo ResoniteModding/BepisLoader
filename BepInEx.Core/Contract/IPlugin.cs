@@ -7,6 +7,7 @@ using BepInEx.Logging;
 
 namespace BepInEx.Contract
 {
+  /// <summary>Contract that every plugin must implement.</summary>
   public interface IPlugin
   {
 	  /// <summary>
@@ -20,8 +21,7 @@ namespace BepInEx.Contract
 	  ManualLogSource Logger { get; }
 
 	  /// <summary>
-	  /// Default config file tied to this plugin. The config file will not be created until 
-	  /// any settings are added and changed, or <see cref="ConfigFile.Save"/> is called.
+	  /// Default config file tied to this plugin. The config file will not be created until any settings are added and changed, or <see cref="ConfigFile.Save"/> is called.
 	  /// </summary>
 	  ConfigFile Config { get; }
   }

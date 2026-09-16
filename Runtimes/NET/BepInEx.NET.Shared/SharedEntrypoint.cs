@@ -93,15 +93,16 @@ namespace BepInEx.NET.Shared
 
 
     /// <summary>
-    ///     Generic helper properties and methods.
+    /// Generic helper properties and methods.
     /// </summary>
     internal static class LocalUtility
     {
         /// <summary>
-        ///     Try to resolve and load the given assembly DLL.
+        /// Try to resolve and load the given assembly DLL.
         /// </summary>
         /// <param name="assemblyName">Name of the assembly, of the type <see cref="AssemblyName" />.</param>
         /// <param name="directory">Directory to search the assembly from.</param>
+        /// <param name="loader">Function that loads an assembly from a file path.</param>
         /// <param name="assembly">The loaded assembly.</param>
         /// <returns>True, if the assembly was found and loaded. Otherwise, false.</returns>
         private static bool TryResolveDllAssembly<T>(AssemblyName assemblyName,
@@ -141,7 +142,7 @@ namespace BepInEx.NET.Shared
         }
 
         /// <summary>
-        ///     Try to resolve and load the given assembly DLL.
+        /// Try to resolve and load the given assembly DLL.
         /// </summary>
         /// <param name="assemblyName">Name of the assembly, of the type <see cref="AssemblyName" />.</param>
         /// <param name="directory">Directory to search the assembly from.</param>

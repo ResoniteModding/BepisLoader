@@ -4,10 +4,11 @@ using BepInEx.Configuration;
 namespace BepInEx.Logging;
 
 /// <summary>
-///     Logs entries using a console spawned by BepInEx.
+/// Logs entries using a console spawned by BepInEx.
 /// </summary>
 public class ConsoleLogListener : ILogListener
 {
+    /// <summary>Log levels displayed in the console output.</summary>
     protected static readonly ConfigEntry<LogLevel> ConfigConsoleDisplayedLevel = ConfigFile.CoreConfig.Bind(
      "Logging.Console", "LogLevels",
      LogLevel.Fatal | LogLevel.Error | LogLevel.Warning | LogLevel.Message | LogLevel.Info,

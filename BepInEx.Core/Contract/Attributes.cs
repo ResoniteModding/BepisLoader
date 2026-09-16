@@ -13,7 +13,7 @@ namespace BepInEx;
 #region BaseUnityPlugin
 
 /// <summary>
-///     This attribute denotes that a class is a plugin, and specifies the required metadata.
+/// This attribute denotes that a class is a plugin, and specifies the required metadata.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 public class BepInPlugin : Attribute
@@ -29,19 +29,19 @@ public class BepInPlugin : Attribute
     }
 
     /// <summary>
-    ///     The unique identifier of the plugin. Should not change between plugin versions.
+    /// The unique identifier of the plugin. Should not change between plugin versions.
     /// </summary>
     public string GUID { get; protected set; }
 
 
     /// <summary>
-    ///     The user friendly name of the plugin. Is able to be changed between versions.
+    /// The user friendly name of the plugin. Is able to be changed between versions.
     /// </summary>
     public string Name { get; protected set; }
 
 
     /// <summary>
-    ///     The specific version of the plugin.
+    /// The specific version of the plugin.
     /// </summary>
     public Version Version { get; protected set; }
 
@@ -77,32 +77,31 @@ public class BepInPlugin : Attribute
 }
 
 /// <summary>
-///     This attribute specifies any dependencies that this plugin has on other plugins.
+/// This attribute specifies any dependencies that this plugin has on other plugins.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class BepInDependency : Attribute, ICacheable
 {
     /// <summary>
-    ///     Flags that are applied to a dependency
+    /// Flags that are applied to a dependency
     /// </summary>
     [Flags]
     public enum DependencyFlags
     {
         /// <summary>
-        ///     The plugin has a hard dependency on the referenced plugin, and will not run without it.
+        /// The plugin has a hard dependency on the referenced plugin, and will not run without it.
         /// </summary>
         HardDependency = 1,
 
         /// <summary>
-        ///     This plugin has a soft dependency on the referenced plugin, and is able to run without it.
+        /// This plugin has a soft dependency on the referenced plugin, and is able to run without it.
         /// </summary>
         SoftDependency = 2
     }
 
     /// <summary>
-    ///     Marks this <see cref="BaseUnityPlugin" /> as dependent on another plugin. The other plugin will be loaded before
-    ///     this one.
-    ///     If the other plugin doesn't exist, what happens depends on the <see cref="Flags" /> parameter.
+    /// Marks this plugin as dependent on another plugin. The other plugin will be loaded before this one.
+    /// If the other plugin doesn't exist, what happens depends on the <see cref="Flags" /> parameter.
     /// </summary>
     /// <param name="DependencyGUID">The GUID of the referenced plugin.</param>
     /// <param name="Flags">The flags associated with this dependency definition.</param>
@@ -114,23 +113,19 @@ public class BepInDependency : Attribute, ICacheable
     }
 
     /// <summary>
-    ///     Marks this <see cref="BaseUnityPlugin" /> as dependent on another plugin. The other plugin will be loaded before
-    ///     this one.
-    ///     If the other plugin doesn't exist or is of a version not satisfying <see cref="VersionRange" />, this plugin will
-    ///     not load and an error will be logged instead.
+    /// Marks this plugin as dependent on another plugin. The other plugin will be loaded before this one.
+    /// If the other plugin doesn't exist or is of a version not satisfying <see cref="VersionRange" />, this plugin will not load and an error will be logged instead.
     /// </summary>
     /// <param name="guid">The GUID of the referenced plugin.</param>
     /// <param name="version">
-    ///     The version requirement of the referenced plugin, parsed as a SemVer range
-    ///     (see <see href="https://github.com/adamreeve/semver.net#ranges" />). A plain version such as
-    ///     <c>1.2.0</c> requires that exact version; use a range such as <c>&gt;=1.2.0</c>, <c>1.2.*</c>,
-    ///     <c>~1.2.0</c> or <c>^1.2.0</c> to accept more than one version.
+    /// The version requirement of the referenced plugin, parsed as a SemVer range (see <see href="https://github.com/adamreeve/semver.net#ranges" />). A plain version such as
+    /// <c>1.2.0</c> requires that exact version; use a range such as <c>&gt;=1.2.0</c>, <c>1.2.*</c>,
+    /// <c>~1.2.0</c> or <c>^1.2.0</c> to accept more than one version.
     /// </param>
     /// <remarks>
-    ///     When a version is supplied the dependency is always treated as a hard dependency.
-    ///     Plugins migrating from BepInEx 5 should note a behaviour change: a bare version was previously
-    ///     treated as a minimum (<c>&gt;=</c>), whereas in BepInEx 6 it is an exact match. Use
-    ///     <c>&gt;=1.2.0</c> to keep the old behaviour.
+    /// When a version is supplied the dependency is always treated as a hard dependency.
+    /// Plugins migrating from BepInEx 5 should note a behaviour change: a bare version was previously treated as a minimum (<c>&gt;=</c>), whereas in BepInEx 6 it is an exact match. Use
+    /// <c>&gt;=1.2.0</c> to keep the old behaviour.
     /// </remarks>
     public BepInDependency(string guid, string version) : this(guid)
     {
@@ -138,17 +133,17 @@ public class BepInDependency : Attribute, ICacheable
     }
 
     /// <summary>
-    ///     The GUID of the referenced plugin.
+    /// The GUID of the referenced plugin.
     /// </summary>
     public string DependencyGUID { get; protected set; }
 
     /// <summary>
-    ///     The flags associated with this dependency definition.
+    /// The flags associated with this dependency definition.
     /// </summary>
     public DependencyFlags Flags { get; protected set; }
 
     /// <summary>
-    ///     The version <see cref="SemVer.Range">range</see> of the referenced plugin.
+    /// The version <see cref="Range">range</see> of the referenced plugin.
     /// </summary>
     public Range VersionRange { get; protected set; }
 
@@ -182,14 +177,14 @@ public class BepInDependency : Attribute, ICacheable
 }
 
 /// <summary>
-///     This attribute specifies other plugins that are incompatible with this plugin.
+/// This attribute specifies other plugins that are incompatible with this plugin.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class BepInIncompatibility : Attribute, ICacheable
 {
     /// <summary>
-    ///     Marks this <see cref="BaseUnityPlugin" /> as incompatible with another plugin.
-    ///     If the other plugin exists, this plugin will not be loaded and a warning will be shown.
+    /// Marks this plugin as incompatible with another plugin.
+    /// If the other plugin exists, this plugin will not be loaded and a warning will be shown.
     /// </summary>
     /// <param name="IncompatibilityGUID">The GUID of the referenced plugin.</param>
     public BepInIncompatibility(string IncompatibilityGUID)
@@ -198,7 +193,7 @@ public class BepInIncompatibility : Attribute, ICacheable
     }
 
     /// <summary>
-    ///     The GUID of the referenced plugin.
+    /// The GUID of the referenced plugin.
     /// </summary>
     public string IncompatibilityGUID { get; protected set; }
 
@@ -218,8 +213,7 @@ public class BepInIncompatibility : Attribute, ICacheable
 }
 
 /// <summary>
-///     This attribute specifies which processes this plugin should be run for. Not specifying this attribute will load the
-///     plugin under every process.
+/// This attribute specifies which processes this plugin should be run for. Not specifying this attribute will load the plugin under every process.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class BepInProcess : Attribute
@@ -231,7 +225,7 @@ public class BepInProcess : Attribute
     }
 
     /// <summary>
-    ///     The name of the process that this plugin will run under.
+    /// The name of the process that this plugin will run under.
     /// </summary>
     public string ProcessName { get; protected set; }
 
@@ -248,7 +242,7 @@ public class BepInProcess : Attribute
 #region MetadataHelper
 
 /// <summary>
-///     Helper class to use for retrieving metadata about a plugin, defined as attributes.
+/// Helper class to use for retrieving metadata about a plugin, defined as attributes.
 /// </summary>
 public static class MetadataHelper
 {
@@ -301,7 +295,7 @@ public static class MetadataHelper
     }
 
     /// <summary>
-    ///     Retrieves the BepInPlugin metadata from a plugin type.
+    /// Retrieves the BepInPlugin metadata from a plugin type.
     /// </summary>
     /// <param name="pluginType">The plugin type.</param>
     /// <returns>The BepInPlugin metadata of the plugin type.</returns>
@@ -316,14 +310,14 @@ public static class MetadataHelper
     }
 
     /// <summary>
-    ///     Retrieves the BepInPlugin metadata from a plugin instance.
+    /// Retrieves the BepInPlugin metadata from a plugin instance.
     /// </summary>
     /// <param name="plugin">The plugin instance.</param>
     /// <returns>The BepInPlugin metadata of the plugin instance.</returns>
     public static BepInPlugin GetMetadata(object plugin) => GetMetadata(plugin.GetType());
 
     /// <summary>
-    ///     Gets the specified attributes of a type, if they exist.
+    /// Gets the specified attributes of a type, if they exist.
     /// </summary>
     /// <typeparam name="T">The attribute type to retrieve.</typeparam>
     /// <param name="pluginType">The plugin type.</param>
@@ -332,7 +326,7 @@ public static class MetadataHelper
         (T[]) pluginType.GetCustomAttributes(typeof(T), true);
 
     /// <summary>
-    ///     Gets the specified attributes of an assembly, if they exist.
+    /// Gets the specified attributes of an assembly, if they exist.
     /// </summary>
     /// <param name="assembly">The assembly.</param>
     /// <typeparam name="T">The attribute type to retrieve.</typeparam>
@@ -341,7 +335,7 @@ public static class MetadataHelper
         (T[]) assembly.GetCustomAttributes(typeof(T), true);
 
     /// <summary>
-    ///     Gets the specified attributes of an instance, if they exist.
+    /// Gets the specified attributes of an instance, if they exist.
     /// </summary>
     /// <typeparam name="T">The attribute type to retrieve.</typeparam>
     /// <param name="plugin">The plugin instance.</param>
@@ -350,7 +344,7 @@ public static class MetadataHelper
         GetAttributes<T>(plugin.GetType());
 
     /// <summary>
-    ///     Gets the specified attributes of a reflection metadata type, if they exist.
+    /// Gets the specified attributes of a reflection metadata type, if they exist.
     /// </summary>
     /// <typeparam name="T">The attribute type to retrieve.</typeparam>
     /// <param name="member">The reflection metadata instance.</param>
@@ -359,7 +353,7 @@ public static class MetadataHelper
         (T[]) member.GetCustomAttributes(typeof(T), true);
 
     /// <summary>
-    ///     Retrieves the dependencies of the specified plugin type.
+    /// Retrieves the dependencies of the specified plugin type.
     /// </summary>
     /// <param name="plugin">The plugin type.</param>
     /// <returns>A list of all plugin types that the specified plugin type depends upon.</returns>
