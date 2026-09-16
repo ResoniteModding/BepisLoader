@@ -3,18 +3,16 @@
         <Description>BepInEx Core library</Description>
         <TargetFrameworks>net10.0</TargetFrameworks>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-        <!-- Force nuget assembly output on netstandard2.0 -->
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\HarmonyX\Harmony\Harmony.csproj"/>
+        <ProjectReference Include="..\HarmonyX\Harmony\Harmony.csproj" SetTargetFramework="TargetFramework=netstandard2.0"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All"/>
         <PackageReference Include="SemanticVersioning" Version="3.0.0"/>
         <PackageReference Include="MonoMod.Utils" Version="25.0.14"/>
         <PackageReference Include="Mono.Cecil" Version="0.11.6" />
-        <PackageReference Include="System.Drawing.Common" Version="10.0.2" />
+        <PackageReference Include="System.Drawing.Common" Version="10.0.12" />
     </ItemGroup>
     <ItemGroup>
         <Compile Remove="Contract\IPlugin.cs"/>
@@ -22,7 +20,7 @@
 
     <!-- CopyLocalLockFileAssemblies causes to also output shared assemblies: https://github.com/NuGet/Home/issues/4837#issuecomment-354536302 -->
     <!-- Since all core assemblies usually follow naming of System.*, we just delete them for now -->
-    <!-- Also delete deps.json as they are not used by mono -->
+    <!-- Also delete deps.json as they are not used at runtime -->
     <Target Name="DeleteSys" AfterTargets="Build">
         <ItemGroup>
             <FilesToDelete Include="$(OutputPath)System.*.dll"/>

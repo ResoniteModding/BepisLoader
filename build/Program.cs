@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
-using System.Text;
 using Cake.Common;
 using Cake.Common.IO;
 using Cake.Common.Tools.DotNet;
@@ -16,7 +15,6 @@ using Cake.Core;
 using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 using Cake.Frosting;
-using Cake.Git;
 using Cake.Json;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
@@ -40,24 +38,10 @@ public class BuildContext : FrostingContext
         BleedingEdge
     }
 
-    public const string DOORSTOP_VERSION = "4.3.0";
-    public const string DOTNET_RUNTIME_VERSION = "6.0.7";
-    public const string DOBBY_VERSION = "1.0.5";
     public const string HOOKFXR_VERSION = "1.1.0";
-    public const string DOTNET_RUNTIME_ZIP_URL =
-        $"https://github.com/BepInEx/dotnet-runtime/releases/download/{DOTNET_RUNTIME_VERSION}/mini-coreclr-Release.zip";
 
     internal readonly DistributionTarget[] Distributions =
     {
-        //new("Unity.Mono", "win-x86"),
-        //new("Unity.Mono", "win-x64"),
-        //new("Unity.Mono", "linux-x86"),
-        //new("Unity.Mono", "linux-x64"),
-        //new("Unity.Mono", "macos-x64"),
-        //new("Unity.IL2CPP", "win-x86"),
-        //new("Unity.IL2CPP", "win-x64"),
-        //new("Unity.IL2CPP", "linux-x64"),
-        //new("Unity.IL2CPP", "macos-x64"),
         //new("NET.Framework", "win-x86", "net40"),
         //new("NET.Framework", "win-x86", "net452"),
         //new("NET.CoreCLR", "win-x64", "netcoreapp3.1"),
@@ -115,12 +99,6 @@ public class BuildContext : FrostingContext
             var _                    => $"-{VersionSuffix}+{this.GitShortenSha(RootDirectory, CurrentCommit)}",
         };
 
-    public static string DoorstopZipUrl(string arch) =>
-        $"https://github.com/NeighTools/UnityDoorstop/releases/download/v{DOORSTOP_VERSION}/doorstop_{arch}_release_{DOORSTOP_VERSION}.zip";
-
-    public static string DobbyZipUrl(string arch) =>
-        $"https://github.com/BepInEx/Dobby/releases/download/v{DOBBY_VERSION}/dobby-{arch}.zip";
-
     public static string HookfxrZipUrl = $"https://github.com/ResoniteModding/hookfxr/releases/download/v{HOOKFXR_VERSION}/hookfxr-Release.zip";
 }
 
@@ -147,12 +125,10 @@ public sealed class RestoreToolsTask : FrostingTask<BuildContext>
     {
         ctx.Log.Information("Restoring dotnet tools...");
 
-        var settings = new Cake.Common.Tools.DotNet.Tool.DotNetToolSettings
+        ctx.DotNetToolRestore(new Cake.Common.Tools.DotNet.Tool.DotNetToolRestoreSettings
         {
             WorkingDirectory = ctx.RootDirectory
-        };
-
-        ctx.DotNetTool("tool restore", settings);
+        });
 
         ctx.Log.Information("Dotnet tools restored successfully.");
     }
@@ -185,7 +161,7 @@ public sealed class CompileTask : FrostingTask<BuildContext>
             };
         }
 
-        ctx.DotNetBuild(ctx.RootDirectory.FullPath, buildSettings);
+        ctx.DotNetBuild(ctx.RootDirectory.CombineWithFilePath("BepInEx.slnx").FullPath, buildSettings);
 
         if (hasBepisLoader)
         {
@@ -242,44 +218,6 @@ public sealed class DownloadDependenciesTask : FrostingTask<BuildContext>
 
         var cache = new DependencyCache(ctx, ctx.CacheDirectory.CombineWithFilePath("cache.json"));
 
-        cache.Refresh("NeighTools/UnityDoorstop", BuildContext.DOORSTOP_VERSION, () =>
-        {
-            ctx.Log.Information($"Downloading Doorstop {BuildContext.DOORSTOP_VERSION}");
-            var doorstopDir = ctx.CacheDirectory.Combine("doorstop");
-            ctx.CreateDirectory(doorstopDir);
-            ctx.CleanDirectory(doorstopDir);
-            var archs = new[] { "win", "linux", "macos" };
-            var versions = archs
-                           .Select(a => ($"Doorstop ({a})",
-                                         BuildContext.DoorstopZipUrl(a),
-                                         doorstopDir.Combine($"doorstop_{a}")))
-                           .ToArray();
-            ctx.DownloadZipFiles($"Doorstop {BuildContext.DOORSTOP_VERSION}", versions);
-        });
-
-        cache.Refresh("BepInEx/Dobby", BuildContext.DOBBY_VERSION, () =>
-        {
-            ctx.Log.Information($"Downloading Dobby {BuildContext.DOBBY_VERSION}");
-            var dobbyDir = ctx.CacheDirectory.Combine("dobby");
-            ctx.CreateDirectory(dobbyDir);
-            ctx.CleanDirectory(dobbyDir);
-            var archs = new[] { "win", "linux", "macos" };
-            var versions = archs
-                           .Select(a => ($"Dobby ({a})", BuildContext.DobbyZipUrl(a), dobbyDir.Combine($"dobby_{a}")))
-                           .ToArray();
-            ctx.DownloadZipFiles($"Dobby {BuildContext.DOBBY_VERSION}", versions);
-        });
-
-        cache.Refresh("BepInEx/dotnet_runtime", BuildContext.DOTNET_RUNTIME_VERSION, () =>
-        {
-            ctx.Log.Information($"Downloading dotnet runtime {BuildContext.DOTNET_RUNTIME_VERSION}");
-            var dotnetDir = ctx.CacheDirectory.Combine("dotnet");
-            ctx.CreateDirectory(dotnetDir);
-            ctx.CleanDirectory(dotnetDir);
-            ctx.DownloadZipFiles($"dotnet-runtime {BuildContext.DOTNET_RUNTIME_VERSION}",
-                                 ("dotnet runtime", BuildContext.DOTNET_RUNTIME_ZIP_URL, dotnetDir));
-        });
-
         cache.Refresh("ResoniteModding/hookfxr", BuildContext.HOOKFXR_VERSION, () =>
         {
             ctx.Log.Information($"Downloading hookfxr {BuildContext.HOOKFXR_VERSION}");
@@ -304,18 +242,6 @@ public sealed class MakeDistTask : FrostingTask<BuildContext>
         ctx.CreateDirectory(ctx.DistributionDirectory);
         ctx.CleanDirectory(ctx.DistributionDirectory);
 
-        var latestTag = ctx.Git("describe --tags --abbrev=0");
-        var changelog = new StringBuilder()
-                        .AppendLine(
-                                    $"{ctx.Git($"rev-list --count {latestTag}..HEAD")} changes since {latestTag}")
-                        .AppendLine()
-                        .AppendLine("Changelog (excluding merge commits):")
-                        .AppendLine(ctx.Git(
-                                            $"--no-pager log --no-merges --pretty=\"format:* (%h) [%an] %s\" {latestTag}..HEAD",
-                                            Environment.NewLine))
-                        .ToString();
-
-
         foreach (var dist in ctx.Distributions)
         {
             ctx.Log.Information($"Creating distribution {dist.Target}");
@@ -326,192 +252,125 @@ public sealed class MakeDistTask : FrostingTask<BuildContext>
             var bepInExDir = targetDir.Combine("BepInEx");
             var bepInExCoreDir = bepInExDir.Combine("core");
 
-            // Only create BepInEx directories for non-BepisLoader distributions
-            if (dist.Runtime != "BepisLoader")
-            {
-                ctx.CreateDirectory(bepInExDir);
-                ctx.CreateDirectory(bepInExCoreDir);
-                ctx.CreateDirectory(bepInExDir.Combine("plugins"));
-                ctx.CreateDirectory(bepInExDir.Combine("patchers"));
-            }
-
             var sourceDirectory = ctx.OutputDirectory.Combine(dist.DistributionIdentifier);
             if (dist.FrameworkTarget != null)
                 sourceDirectory = sourceDirectory.Combine(dist.FrameworkTarget);
 
-            if (dist.Runtime != "BepisLoader")
+            if (dist.Runtime == "BepisLoader")
             {
-                File.WriteAllText(targetDir.CombineWithFilePath("changelog.txt").FullPath, changelog);
-
-                foreach (var filePath in ctx.GetFiles(sourceDirectory.Combine("*.*").FullPath))
+                foreach (var filePath in ctx.GetFiles(sourceDirectory.Combine("BepisLoader.*").FullPath))
                 {
                     var fileName = filePath.GetFilename().FullPath.ToLower();
-                    // Skip XML documentation files
                     if (!fileName.EndsWith(".xml"))
                     {
+                        ctx.CopyFileToDirectory(filePath, targetDir);
+                    }
+                }
+
+                // Copy LinuxBootstrap.sh from BepisLoader project directory
+                var linuxBootstrapPath = ctx.RootDirectory.CombineWithFilePath("Runtimes/NET/BepisLoader/LinuxBootstrap.sh");
+                if (ctx.FileExists(linuxBootstrapPath))
+                {
+                    ctx.CopyFileToDirectory(linuxBootstrapPath, targetDir);
+                    ctx.Log.Information("Copied LinuxBootstrap.sh to distribution");
+                }
+                else
+                {
+                    ctx.Log.Warning("LinuxBootstrap.sh not found at: " + linuxBootstrapPath);
+                }
+
+                var netCoreCLRSource = ctx.OutputDirectory.Combine("NET.CoreCLR").Combine("net10.0");
+                if (ctx.DirectoryExists(netCoreCLRSource))
+                {
+                    // Create BepInEx directories only if we have files to copy
+                    ctx.CreateDirectory(bepInExDir);
+                    ctx.CreateDirectory(bepInExCoreDir);
+
+                    foreach (var filePath in ctx.GetFiles(netCoreCLRSource.Combine("*.*").FullPath))
+                    {
+                        var fileName = filePath.GetFilename().FullPath.ToLower();
                         ctx.CopyFileToDirectory(filePath, bepInExCoreDir);
                     }
                 }
-            }
-
-            if (dist.Engine == "Unity")
-            {
-                var doorstopPath = dist.Os == "macos"
-                    ? ctx.CacheDirectory.Combine("doorstop").Combine("doorstop_macos").Combine("universal")
-                    : ctx.CacheDirectory.Combine("doorstop").Combine($"doorstop_{dist.Os}").Combine(dist.Arch);
-                foreach (var filePath in ctx.GetFiles(doorstopPath.Combine($"*.{dist.DllExtension}").FullPath))
-                    ctx.CopyFileToDirectory(filePath, targetDir);
-                ctx.CopyFileToDirectory(doorstopPath.CombineWithFilePath(".doorstop_version"), targetDir);
-                var (doorstopConfigFile, doorstopConfigDistName) = dist.Os switch
+                else
                 {
-                    "win" => ($"doorstop_config_{dist.Runtime.ToLower()}.ini",
-                              "doorstop_config.ini"),
-                    "linux" or "macos" => ($"run_bepinex_{dist.Runtime.ToLower()}.sh",
-                                           "run_bepinex.sh"),
-                    var _ => throw new
-                                 NotSupportedException(
-                                                       $"Doorstop is not supported on {dist.Os}")
-                };
-                ctx.CopyFile(ctx.RootDirectory.Combine("Runtimes").Combine("Unity").Combine("Doorstop").CombineWithFilePath(doorstopConfigFile),
-                             targetDir.CombineWithFilePath(doorstopConfigDistName));
-
-                if (dist.Runtime == "IL2CPP")
-                {
-                    ctx.CopyFile(ctx.CacheDirectory.Combine("dobby").Combine($"dobby_{dist.Os}").CombineWithFilePath($"{dist.DllPrefix}dobby_{dist.Arch}.{dist.DllExtension}"),
-                                 bepInExCoreDir.CombineWithFilePath($"{dist.DllPrefix}dobby.{dist.DllExtension}"));
-                    ctx.CopyDirectory(ctx.CacheDirectory.Combine("dotnet").Combine(dist.RuntimeIdentifier),
-                                      targetDir.Combine("dotnet"));
+                    ctx.Log.Warning($"NET.CoreCLR output directory not found: {netCoreCLRSource}");
+                    ctx.Log.Warning("Make sure to build NET.CoreCLR target first if you want BepInEx support");
                 }
-            }
-            else if (dist.Engine == "NET")
-            {
-                if (dist.Runtime == "Framework")
-                {
-                    ctx.DeleteFile(bepInExCoreDir.CombineWithFilePath("BepInEx.NET.Framework.Launcher.exe.config"));
 
-                    ctx.MoveFileToDirectory(bepInExCoreDir.CombineWithFilePath("BepInEx.NET.Framework.Launcher.exe"), targetDir);
-                }
-                else if (dist.Runtime == "CoreCLR")
+                // Copy hookfxr files to root directory (excluding readme files and pdb files)
+                var hookfxrPath = ctx.CacheDirectory.Combine("hookfxr");
+                if (ctx.DirectoryExists(hookfxrPath))
                 {
-                    foreach (var filePath in ctx.GetFiles(bepInExCoreDir.Combine("BepInEx.NET.CoreCLR.*").FullPath))
-                        ctx.MoveFileToDirectory(filePath, targetDir);
-                }
-                else if (dist.Runtime == "BepisLoader")
-                {
-                    foreach (var filePath in ctx.GetFiles(sourceDirectory.Combine("BepisLoader.*").FullPath))
+                    foreach (var filePath in ctx.GetFiles(hookfxrPath.Combine("*.*").FullPath))
                     {
                         var fileName = filePath.GetFilename().FullPath.ToLower();
-                        if (!fileName.EndsWith(".xml"))
+                        if (!fileName.EndsWith(".md") && !fileName.EndsWith(".pdb"))
                         {
                             ctx.CopyFileToDirectory(filePath, targetDir);
                         }
                     }
 
-                    // Copy LinuxBootstrap.sh from BepisLoader project directory
-                    var linuxBootstrapPath = ctx.RootDirectory.CombineWithFilePath("Runtimes/NET/BepisLoader/LinuxBootstrap.sh");
-                    if (ctx.FileExists(linuxBootstrapPath))
+                    // Update hookfxr.ini to target BepisLoader.dll
+                    var hookfxrIniPath = targetDir.CombineWithFilePath("hookfxr.ini");
+                    if (ctx.FileExists(hookfxrIniPath))
                     {
-                        ctx.CopyFileToDirectory(linuxBootstrapPath, targetDir);
-                        ctx.Log.Information("Copied LinuxBootstrap.sh to distribution");
+                        var iniContent = System.IO.File.ReadAllText(hookfxrIniPath.FullPath);
+                        iniContent = iniContent.Replace("enable=true", "enable=false");
+                        iniContent = iniContent.Replace("target_assembly=MyApplication.dll", "target_assembly=BepisLoader.dll");
+                        iniContent = iniContent.Replace("merge_deps_json=true", "merge_deps_json=false");
+                        System.IO.File.WriteAllText(hookfxrIniPath.FullPath, iniContent);
+                        ctx.Log.Information("Updated hookfxr.ini to target BepisLoader.dll");
                     }
-                    else
-                    {
-                        ctx.Log.Warning("LinuxBootstrap.sh not found at: " + linuxBootstrapPath);
-                    }
+                }
+                else
+                {
+                    ctx.Log.Warning($"hookfxr cache directory not found: {hookfxrPath}");
+                }
 
-                    var netCoreCLRSource = ctx.OutputDirectory.Combine("NET.CoreCLR").Combine("net10.0");
-                    if (ctx.DirectoryExists(netCoreCLRSource))
-                    {
-                        // Create BepInEx directories only if we have files to copy
-                        ctx.CreateDirectory(bepInExDir);
-                        ctx.CreateDirectory(bepInExCoreDir);
-
-                        foreach (var filePath in ctx.GetFiles(netCoreCLRSource.Combine("*.*").FullPath))
+                // Replace contents of BepisLoader.runtimeconfig.json with the proper framework configuration for windows
+                var runtimeConfigPath = targetDir.CombineWithFilePath("BepisLoader.runtimeconfig.json");
+                if (ctx.FileExists(runtimeConfigPath))
+                {
+                    var runtimeConfig = """
                         {
-                            var fileName = filePath.GetFilename().FullPath.ToLower();
-                            ctx.CopyFileToDirectory(filePath, bepInExCoreDir);
-                        }
-                    }
-                    else
-                    {
-                        ctx.Log.Warning($"NET.CoreCLR output directory not found: {netCoreCLRSource}");
-                        ctx.Log.Warning("Make sure to build NET.CoreCLR target first if you want BepInEx support");
-                    }
-
-                    // Copy hookfxr files to root directory (excluding readme files and pdb files)
-                    var hookfxrPath = ctx.CacheDirectory.Combine("hookfxr");
-                    if (ctx.DirectoryExists(hookfxrPath))
-                    {
-                        foreach (var filePath in ctx.GetFiles(hookfxrPath.Combine("*.*").FullPath))
-                        {
-                            var fileName = filePath.GetFilename().FullPath.ToLower();
-                            if (!fileName.EndsWith(".md") && !fileName.EndsWith(".pdb"))
-                            {
-                                ctx.CopyFileToDirectory(filePath, targetDir);
-                            }
-                        }
-
-                        // Update hookfxr.ini to target BepisLoader.dll
-                        var hookfxrIniPath = targetDir.CombineWithFilePath("hookfxr.ini");
-                        if (ctx.FileExists(hookfxrIniPath))
-                        {
-                            var iniContent = System.IO.File.ReadAllText(hookfxrIniPath.FullPath);
-                            iniContent = iniContent.Replace("enable=true", "enable=false");
-                            iniContent = iniContent.Replace("target_assembly=MyApplication.dll", "target_assembly=BepisLoader.dll");
-                            iniContent = iniContent.Replace("merge_deps_json=true", "merge_deps_json=false");
-                            System.IO.File.WriteAllText(hookfxrIniPath.FullPath, iniContent);
-                            ctx.Log.Information("Updated hookfxr.ini to target BepisLoader.dll");
-                        }
-                    }
-                    else
-                    {
-                        ctx.Log.Warning($"hookfxr cache directory not found: {hookfxrPath}");
-                    }
-
-                    // Replace contents of BepisLoader.runtimeconfig.json with the proper framework configuration for windows
-                    var runtimeConfigPath = targetDir.CombineWithFilePath("BepisLoader.runtimeconfig.json");
-                    if (ctx.FileExists(runtimeConfigPath))
-                    {
-                        var runtimeConfig = """
-                            {
-                              "runtimeOptions": {
-                                "tfm": "net10.0",
-                                "frameworks": [
-                                  {
-                                    "name": "Microsoft.NETCore.App",
-                                    "version": "10.0.0"
-                                  },
-                                  {
-                                    "name": "Microsoft.WindowsDesktop.App",
-                                    "version": "10.0.0"
-                                  }
-                                ],
-                                "configProperties": {
-                                  "System.Reflection.Metadata.MetadataUpdater.IsSupported": false,
-                                  "System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization": false
-                                }
+                          "runtimeOptions": {
+                            "tfm": "net10.0",
+                            "frameworks": [
+                              {
+                                "name": "Microsoft.NETCore.App",
+                                "version": "10.0.0"
+                              },
+                              {
+                                "name": "Microsoft.WindowsDesktop.App",
+                                "version": "10.0.0"
                               }
+                            ],
+                            "configProperties": {
+                              "System.Reflection.Metadata.MetadataUpdater.IsSupported": false,
+                              "System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization": false
                             }
-                            """;
-                        System.IO.File.WriteAllText(runtimeConfigPath.FullPath, runtimeConfig);
-                        ctx.Log.Information("Updated BepisLoader.runtimeconfig.json with proper framework configuration");
-                    }
-                    else
-                    {
-                        ctx.Log.Warning($"BepisLoader.runtimeconfig.json not found at: {runtimeConfigPath}");
-                    }
+                          }
+                        }
+                        """;
+                    System.IO.File.WriteAllText(runtimeConfigPath.FullPath, runtimeConfig);
+                    ctx.Log.Information("Updated BepisLoader.runtimeconfig.json with proper framework configuration");
+                }
+                else
+                {
+                    ctx.Log.Warning($"BepisLoader.runtimeconfig.json not found at: {runtimeConfigPath}");
+                }
 
-                    // Copy icon.ico from BepisLoader project directory to BepInEx folder
-                    var iconPath = ctx.RootDirectory.CombineWithFilePath("Runtimes/NET/BepisLoader/icon.ico");
-                    if (ctx.FileExists(iconPath))
-                    {
-                        ctx.CopyFileToDirectory(iconPath, bepInExDir);
-                        ctx.Log.Information("Copied icon.ico to BepInEx folder");
-                    }
-                    else
-                    {
-                        ctx.Log.Warning("icon.ico not found at: " + iconPath);
-                    }
+                // Copy icon.ico from BepisLoader project directory to BepInEx folder
+                var iconPath = ctx.RootDirectory.CombineWithFilePath("Runtimes/NET/BepisLoader/icon.ico");
+                if (ctx.FileExists(iconPath))
+                {
+                    ctx.CopyFileToDirectory(iconPath, bepInExDir);
+                    ctx.Log.Information("Copied icon.ico to BepInEx folder");
+                }
+                else
+                {
+                    ctx.Log.Warning("icon.ico not found at: " + iconPath);
                 }
             }
         }

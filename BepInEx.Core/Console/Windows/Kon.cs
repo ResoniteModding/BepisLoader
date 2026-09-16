@@ -1,9 +1,5 @@
 using System;
 using System.Runtime.InteropServices;
-#if NET35
-using System.Security.Permissions;
-
-#endif
 
 namespace BepInEx.ConsoleUtil
 {
@@ -93,9 +89,6 @@ namespace BepInEx.ConsoleUtil
 
         private static void SetConsoleColor(bool isBackground, ConsoleColor c)
         {
-#if NET35
-            new UIPermission(UIPermissionWindow.SafeTopLevelWindows).Demand();
-#endif
             var color = ConsoleColorToColorAttribute((short) c, isBackground);
             bool flag;
             var bufferInfo = GetBufferInfo(false, out flag);

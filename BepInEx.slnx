@@ -1,0 +1,24 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Folder Name="/NET/">
+    <Project Path="Runtimes/NET/BepInEx.NET.Common/BepInEx.NET.Common.csproj" />
+    <Project Path="Runtimes/NET/BepInEx.NET.CoreCLR/BepInEx.NET.CoreCLR.csproj" />
+    <Project Path="Runtimes/NET/BepInEx.NET.Shared/BepInEx.NET.Shared.shproj" />
+    <Project Path="Runtimes/NET/BepisLoader/BepisLoader.csproj" />
+  </Folder>
+  <Folder Name="/Shared/">
+    <File Path="Directory.Build.props" />
+  </Folder>
+  <Folder Name="/Shared/Markdown/">
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="BepInEx.Core/BepInEx.Core.csproj" />
+  <Project Path="BepInEx.Preloader.Core/BepInEx.Preloader.Core.csproj" />
+  <Project Path="build/Build.csproj">
+    <Build Solution="Debug|*" Project="false" />
+    <Build Solution="Release|*" Project="false" />
+  </Project>
+</Solution>
