@@ -9,7 +9,7 @@ using BepInEx.Logging;
 namespace BepInEx.Configuration;
 
 /// <summary>
-///     A helper class to handle persistent data. All public methods are thread-safe.
+/// A helper class to handle persistent data. All public methods are thread-safe.
 /// </summary>
 public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
 {
@@ -19,7 +19,7 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     public ConfigFile(string configPath, bool saveOnInit) : this(configPath, saveOnInit, null) { }
 
     /// <summary>
-    ///     Create a new config file at the specified config path.
+    /// Create a new config file at the specified config path.
     /// </summary>
     /// <param name="configPath">Full path to a file that contains settings. The file will be created as needed.</param>
     /// <param name="saveOnInit">If the config file/directory doesn't exist, create it immediately.</param>
@@ -37,17 +37,18 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
         else if (saveOnInit) TrySave();
     }
 
+    /// <summary>Config file holding the core BepInEx settings.</summary>
     public static ConfigFile CoreConfig { get; } = new(Paths.BepInExConfigPath, true);
 
     /// <summary>
-    ///     All config entries inside
+    /// All config entries inside
     /// </summary>
     protected Dictionary<ConfigDefinition, ConfigEntryBase> Entries { get; } = new();
 
     private Dictionary<ConfigDefinition, string> OrphanedEntries { get; } = new();
 
     /// <summary>
-    ///     Create a list with all config entries inside of this config file.
+    /// Create a list with all config entries inside of this config file.
     /// </summary>
     [Obsolete("Use Keys instead")]
     public ReadOnlyCollection<ConfigDefinition> ConfigDefinitions
@@ -62,14 +63,13 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     }
 
     /// <summary>
-    ///     Full path to the config file. The file might not exist until a setting is added and changed, or <see cref="Save" />
-    ///     is called.
+    /// Full path to the config file. The file might not exist until a setting is added and changed, or <see cref="Save" /> is called.
     /// </summary>
     public string ConfigFilePath { get; }
 
     /// <summary>
-    ///     If enabled, writes the config to disk every time a value is set.
-    ///     If disabled, you have to manually use <see cref="Save" /> or the changes will be lost!
+    /// If enabled, writes the config to disk every time a value is set.
+    /// If disabled, you have to manually use <see cref="Save" /> or the changes will be lost!
     /// </summary>
     public bool SaveOnConfigSet { get; set; } = true;
 
@@ -206,8 +206,8 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     }
 
     /// <summary>
-    ///     Returns the ConfigDefinitions that the ConfigFile contains.
-    ///     <para>Creates a new array when the property is accessed. Thread-safe.</para>
+    /// Returns the ConfigDefinitions that the ConfigFile contains.
+    /// <para>Creates a new array when the property is accessed. Thread-safe.</para>
     /// </summary>
     public ICollection<ConfigDefinition> Keys
     {
@@ -221,8 +221,8 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     }
 
     /// <summary>
-    ///     Returns the ConfigEntryBase values that the ConfigFile contains.
-    ///     <para>Creates a new array when the property is accessed. Thread-safe.</para>
+    /// Returns the ConfigEntryBase values that the ConfigFile contains.
+    /// <para>Creates a new array when the property is accessed. Thread-safe.</para>
     /// </summary>
     public ICollection<ConfigEntryBase> Values
     {
@@ -236,10 +236,10 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     }
 
     /// <summary>
-    ///     Create an array with all config entries inside of this config file. Should be only used for metadata purposes.
-    ///     If you want to access and modify an existing setting then use
-    ///     <see cref="AddSetting{T}(ConfigDefinition,T,ConfigDescription)" />
-    ///     instead with no description.
+    /// Create an array with all config entries inside of this config file. Should be only used for metadata purposes.
+    /// If you want to access and modify an existing setting then use
+    /// <see cref="AddSetting{T}(ConfigDefinition,T,ConfigDescription)" />
+    /// instead with no description.
     /// </summary>
     [Obsolete("Use Values instead")]
     public ConfigEntryBase[] GetConfigEntries()
@@ -255,12 +255,12 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     private readonly object _ioLock = new();
 
     /// <summary>
-    ///     Generate user-readable comments for each of the settings in the saved .cfg file.
+    /// Generate user-readable comments for each of the settings in the saved .cfg file.
     /// </summary>
     public bool GenerateSettingDescriptions { get; set; } = true;
 
     /// <summary>
-    ///     Reloads the config from disk. Unsaved changes are lost.
+    /// Reloads the config from disk. Unsaved changes are lost.
     /// </summary>
     public void Reload()
     {
@@ -305,7 +305,7 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     }
 
     /// <summary>
-    ///     Writes the config to disk.
+    /// Writes the config to disk.
     /// </summary>
     public void Save()
     {
@@ -356,9 +356,7 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     }
 
     /// <summary>
-    ///     Writes the config to disk like <see cref="Save" />, but logs and swallows I/O failures (e.g. a read-only
-    ///     or locked config file) instead of throwing. Used only for the creation-time saves (initial file write and
-    ///     new-entry binds), which can run before logging is up; explicit saves and setting changes still throw.
+    /// Writes the config to disk like <see cref="Save" />, but logs and swallows I/O failures (e.g. a read-only or locked config file) instead of throwing. Used only for the creation-time saves (initial file write and new-entry binds), which can run before logging is up; explicit saves and setting changes still throw.
     /// </summary>
     private void TrySave()
     {
@@ -378,9 +376,9 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     #region Wraps
 
     /// <summary>
-    ///     Access one of the existing settings. If the setting has not been added yet, null is returned.
-    ///     If the setting exists but has a different type than T, an exception is thrown.
-    ///     New settings should be added with <see cref="AddSetting{T}(ConfigDefinition,T,ConfigDescription)" />.
+    /// Access one of the existing settings. If the setting has not been added yet, null is returned.
+    /// If the setting exists but has a different type than T, an exception is thrown.
+    /// New settings should be added with <see cref="AddSetting{T}(ConfigDefinition,T,ConfigDescription)" />.
     /// </summary>
     /// <typeparam name="T">Type of the value contained in this setting.</typeparam>
     /// <param name="configDefinition">Section and Key of the setting.</param>
@@ -391,9 +389,9 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
             : null;
 
     /// <summary>
-    ///     Access one of the existing settings. If the setting has not been added yet, null is returned.
-    ///     If the setting exists but has a different type than T, an exception is thrown.
-    ///     New settings should be added with <see cref="AddSetting{T}(ConfigDefinition,T,ConfigDescription)" />.
+    /// Access one of the existing settings. If the setting has not been added yet, null is returned.
+    /// If the setting exists but has a different type than T, an exception is thrown.
+    /// New settings should be added with <see cref="AddSetting{T}(ConfigDefinition,T,ConfigDescription)" />.
     /// </summary>
     /// <typeparam name="T">Type of the value contained in this setting.</typeparam>
     /// <param name="section">Section/category/group of the setting. Settings are grouped by this.</param>
@@ -405,10 +403,10 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
             : null;
 
     /// <summary>
-    ///     Access one of the existing settings. If the setting has not been added yet, false is returned. Otherwise, true.
-    ///     If the setting exists but has a different type than T, an exception is thrown.
-    ///     New settings should be added with
-    ///     <see cref="Bind{T}(BepInEx.Configuration.ConfigDefinition,T,BepInEx.Configuration.ConfigDescription)" />.
+    /// Access one of the existing settings. If the setting has not been added yet, false is returned. Otherwise, true.
+    /// If the setting exists but has a different type than T, an exception is thrown.
+    /// New settings should be added with
+    /// <see cref="Bind{T}(BepInEx.Configuration.ConfigDefinition,T,BepInEx.Configuration.ConfigDescription)" />.
     /// </summary>
     /// <typeparam name="T">Type of the value contained in this setting.</typeparam>
     /// <param name="configDefinition">Section and Key of the setting.</param>
@@ -429,10 +427,10 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     }
 
     /// <summary>
-    ///     Access one of the existing settings. If the setting has not been added yet, null is returned.
-    ///     If the setting exists but has a different type than T, an exception is thrown.
-    ///     New settings should be added with
-    ///     <see cref="Bind{T}(BepInEx.Configuration.ConfigDefinition,T,BepInEx.Configuration.ConfigDescription)" />.
+    /// Access one of the existing settings. If the setting has not been added yet, null is returned.
+    /// If the setting exists but has a different type than T, an exception is thrown.
+    /// New settings should be added with
+    /// <see cref="Bind{T}(BepInEx.Configuration.ConfigDefinition,T,BepInEx.Configuration.ConfigDescription)" />.
     /// </summary>
     /// <typeparam name="T">Type of the value contained in this setting.</typeparam>
     /// <param name="section">Section/category/group of the setting. Settings are grouped by this.</param>
@@ -442,8 +440,8 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
         TryGetEntry(new ConfigDefinition(section, key), out entry);
 
     /// <summary>
-    ///     Create a new setting. The setting is saved to drive and loaded automatically.
-    ///     Each definition can be used to add only one setting, trying to add a second setting will throw an exception.
+    /// Create a new setting. The setting is saved to drive and loaded automatically.
+    /// Each definition can be used to add only one setting, trying to add a second setting will throw an exception.
     /// </summary>
     /// <typeparam name="T">Type of the value contained in this setting.</typeparam>
     /// <param name="configDefinition">Section and Key of the setting.</param>
@@ -480,9 +478,8 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     }
 
     /// <summary>
-    ///     Create a new setting. The setting is saved to drive and loaded automatically.
-    ///     Each section and key pair can be used to add only one setting, trying to add a second setting will throw an
-    ///     exception.
+    /// Create a new setting. The setting is saved to drive and loaded automatically.
+    /// Each section and key pair can be used to add only one setting, trying to add a second setting will throw an exception.
     /// </summary>
     /// <typeparam name="T">Type of the value contained in this setting.</typeparam>
     /// <param name="section">Section/category/group of the setting. Settings are grouped by this.</param>
@@ -496,9 +493,8 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
         Bind(new ConfigDefinition(section, key), defaultValue, configDescription);
 
     /// <summary>
-    ///     Create a new setting. The setting is saved to drive and loaded automatically.
-    ///     Each section and key pair can be used to add only one setting, trying to add a second setting will throw an
-    ///     exception.
+    /// Create a new setting. The setting is saved to drive and loaded automatically.
+    /// Each section and key pair can be used to add only one setting, trying to add a second setting will throw an exception.
     /// </summary>
     /// <typeparam name="T">Type of the value contained in this setting.</typeparam>
     /// <param name="section">Section/category/group of the setting. Settings are grouped by this.</param>
@@ -509,8 +505,8 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
         Bind(new ConfigDefinition(section, key), defaultValue, new ConfigDescription(description));
 
     /// <summary>
-    ///     Create a new setting. The setting is saved to drive and loaded automatically.
-    ///     Each definition can be used to add only one setting, trying to add a second setting will throw an exception.
+    /// Create a new setting. The setting is saved to drive and loaded automatically.
+    /// Each definition can be used to add only one setting, trying to add a second setting will throw an exception.
     /// </summary>
     /// <typeparam name="T">Type of the value contained in this setting.</typeparam>
     /// <param name="configDefinition">Section and Key of the setting.</param>
@@ -523,9 +519,8 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
         Bind(configDefinition, defaultValue, configDescription);
 
     /// <summary>
-    ///     Create a new setting. The setting is saved to drive and loaded automatically.
-    ///     Each section and key pair can be used to add only one setting, trying to add a second setting will throw an
-    ///     exception.
+    /// Create a new setting. The setting is saved to drive and loaded automatically.
+    /// Each section and key pair can be used to add only one setting, trying to add a second setting will throw an exception.
     /// </summary>
     /// <typeparam name="T">Type of the value contained in this setting.</typeparam>
     /// <param name="section">Section/category/group of the setting. Settings are grouped by this.</param>
@@ -540,9 +535,8 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
         Bind(new ConfigDefinition(section, key), defaultValue, configDescription);
 
     /// <summary>
-    ///     Create a new setting. The setting is saved to drive and loaded automatically.
-    ///     Each section and key pair can be used to add only one setting, trying to add a second setting will throw an
-    ///     exception.
+    /// Create a new setting. The setting is saved to drive and loaded automatically.
+    /// Each section and key pair can be used to add only one setting, trying to add a second setting will throw an exception.
     /// </summary>
     /// <typeparam name="T">Type of the value contained in this setting.</typeparam>
     /// <param name="section">Section/category/group of the setting. Settings are grouped by this.</param>
@@ -554,7 +548,7 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
         Bind(new ConfigDefinition(section, key), defaultValue, new ConfigDescription(description));
 
     /// <summary>
-    ///     Access a setting. Use Bind instead.
+    /// Access a setting. Use Bind instead.
     /// </summary>
     [Obsolete("Use Bind instead")]
     public ConfigWrapper<T> Wrap<T>(string section, string key, string description = null, T defaultValue = default)
@@ -569,7 +563,7 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     }
 
     /// <summary>
-    ///     Access a setting. Use Bind instead.
+    /// Access a setting. Use Bind instead.
     /// </summary>
     [Obsolete("Use Bind instead")]
     public ConfigWrapper<T> Wrap<T>(ConfigDefinition configDefinition, T defaultValue = default) =>
@@ -580,12 +574,12 @@ public class ConfigFile : IDictionary<ConfigDefinition, ConfigEntryBase>
     #region Events
 
     /// <summary>
-    ///     An event that is fired every time the config is reloaded.
+    /// An event that is fired every time the config is reloaded.
     /// </summary>
     public event EventHandler ConfigReloaded;
 
     /// <summary>
-    ///     Fired when one of the settings is changed.
+    /// Fired when one of the settings is changed.
     /// </summary>
     public event EventHandler<SettingChangedEventArgs> SettingChanged;
 

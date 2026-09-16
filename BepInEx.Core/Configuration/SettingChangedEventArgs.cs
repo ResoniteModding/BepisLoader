@@ -3,7 +3,7 @@
 namespace BepInEx.Configuration;
 
 /// <summary>
-///     Arguments for events concerning a change of a setting.
+/// Arguments for events concerning a change of a setting.
 /// </summary>
 /// <inheritdoc />
 public sealed class SettingChangedEventArgs : EventArgs
@@ -15,7 +15,7 @@ public sealed class SettingChangedEventArgs : EventArgs
     }
 
     /// <summary>
-    ///     Setting that was changed
+    /// Setting that was changed
     /// </summary>
     public ConfigEntryBase ChangedSetting { get; }
 }

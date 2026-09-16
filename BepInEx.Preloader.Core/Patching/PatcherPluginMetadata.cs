@@ -4,12 +4,12 @@ using BepInEx.Bootstrap;
 namespace BepInEx.Preloader.Core.Patching;
 
 /// <summary>
-///     A single cached assembly patcher.
+/// A single cached assembly patcher.
 /// </summary>
 internal class PatcherPluginMetadata : ICacheable
 {
     /// <summary>
-    ///     Type name of the patcher.
+    /// Type name of the patcher.
     /// </summary>
     public string TypeName { get; set; } = string.Empty;
 

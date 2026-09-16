@@ -4,22 +4,32 @@ using Mono.Cecil;
 
 namespace BepInEx.Preloader.Core
 {
+    /// <summary>Describes the target framework and architecture of a managed assembly.</summary>
     public class AssemblyBuildInfo
     {
+        /// <summary>Kind of .NET framework an assembly targets.</summary>
         public enum FrameworkType
         {
+            /// <summary>Framework could not be determined.</summary>
             Unknown,
+            /// <summary>.NET Framework.</summary>
             NetFramework,
+            /// <summary>.NET Standard.</summary>
             NetStandard,
+            /// <summary>.NET (Core).</summary>
             NetCore
         }
 
+        /// <summary>Target framework version of the assembly.</summary>
         public Version NetFrameworkVersion { get; private set; }
 
+        /// <summary>Whether the assembly targets AnyCPU.</summary>
         public bool IsAnyCpu { get; set; }
 
+        /// <summary>Whether the assembly prefers 64-bit execution.</summary>
         public bool Is64Bit { get; set; }
 
+        /// <summary>Kind of .NET framework the assembly targets.</summary>
         public FrameworkType AssemblyFrameworkType { get; set; }
 
         private void SetNet4Version(AssemblyDefinition assemblyDefinition)
@@ -68,6 +78,9 @@ namespace BepInEx.Preloader.Core
             }
         }
 
+        /// <summary>Determines the target framework and architecture of an assembly.</summary>
+        /// <param name="assemblyDefinition">Assembly to inspect.</param>
+        /// <returns>Build information of the assembly.</returns>
         public static AssemblyBuildInfo DetermineInfo(AssemblyDefinition assemblyDefinition)
         {
             var buildInfo = new AssemblyBuildInfo();

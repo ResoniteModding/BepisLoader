@@ -9,7 +9,7 @@ using System.Reflection;
 namespace UnityInjector.ConsoleUtil;
 
 /// <summary>
-///     Console class with safe handlers for Unity 4.x, which does not have a proper Console implementation
+/// Console class with safe handlers for Unity 4.x, which does not have a proper Console implementation
 /// </summary>
 internal static class SafeConsole
 {

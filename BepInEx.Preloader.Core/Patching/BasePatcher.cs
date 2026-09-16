@@ -4,10 +4,11 @@ using BepInEx.Logging;
 namespace BepInEx.Preloader.Core.Patching;
 
 /// <summary>
-///     A patcher that can contain multiple methods for patching assemblies.
+/// A patcher that can contain multiple methods for patching assemblies.
 /// </summary>
 public abstract class BasePatcher
 {
+    /// <summary>Initializes a new patcher plugin.</summary>
     protected BasePatcher()
     {
         Info = PatcherPluginInfoAttribute.FromType(GetType());
@@ -19,33 +20,32 @@ public abstract class BasePatcher
     }
 
     /// <summary>
-    ///     A <see cref="ILogSource" /> instance created for use by this patcher plugin.
+    /// A <see cref="ILogSource" /> instance created for use by this patcher plugin.
     /// </summary>
     public ManualLogSource Log { get; }
 
     /// <summary>
-    ///     A configuration file binding created with the <see cref="PatcherPluginInfoAttribute.GUID" /> of this plugin as the
-    ///     filename.
+    /// A configuration file binding created with the <see cref="PatcherPluginInfoAttribute.GUID" /> of this plugin as the filename.
     /// </summary>
     public ConfigFile Config { get; }
 
     /// <summary>
-    ///     Metadata associated with this patcher plugin.
+    /// Metadata associated with this patcher plugin.
     /// </summary>
     public PatcherPluginInfoAttribute Info { get; }
 
     /// <summary>
-    ///     The context of the <see cref="AssemblyPatcher" /> this BasePatcher is associated with.
+    /// The context of the <see cref="AssemblyPatcher" /> this BasePatcher is associated with.
     /// </summary>
     public PatcherContext Context { get; set; }
 
     /// <summary>
-    ///     Executed before any patches from any plugin are applied.
+    /// Executed before any patches from any plugin are applied.
     /// </summary>
     public virtual void Initialize() { }
 
     /// <summary>
-    ///     Executed after all patches from all plugins have been applied.
+    /// Executed after all patches from all plugins have been applied.
     /// </summary>
     public virtual void Finalizer() { }
 }

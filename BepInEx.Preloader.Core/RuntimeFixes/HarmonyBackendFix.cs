@@ -4,6 +4,7 @@ using BepInEx.Configuration;
 
 namespace BepInEx.Preloader.RuntimeFixes;
 
+/// <summary>Applies the configured MonoMod backend for Harmony patches.</summary>
 public static class HarmonyBackendFix
 {
     private static readonly ConfigEntry<MonoModBackend> ConfigHarmonyBackend = ConfigFile.CoreConfig.Bind(
@@ -12,6 +13,7 @@ public static class HarmonyBackendFix
      MonoModBackend.auto,
      "Specifies which MonoMod backend to use for Harmony patches. Auto uses the best available backend.\nThis setting should only be used for development purposes (e.g. debugging in dnSpy). Other code might override this setting.");
 
+    /// <summary>Reads the backend setting and configures MonoMod accordingly.</summary>
     public static void Initialize()
     {
         switch (ConfigHarmonyBackend.Value)

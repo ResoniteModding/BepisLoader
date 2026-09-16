@@ -6,13 +6,11 @@ using BepInEx.Logging;
 namespace BepInEx.Core.Logging.Interpolation;
 
 /// <summary>
-///     Interpolated string handler for BepInEx <see cref="Logger" />. This allows to conditionally skip logging certain
-///     messages and speed up logging in certain places.
+/// Interpolated string handler for BepInEx <see cref="Logger" />. This allows to conditionally skip logging certain messages and speed up logging in certain places.
 /// </summary>
 /// <remarks>
-///     The class isn't meant to be constructed manually.
-///     Instead, use <see cref="ManualLogSource.Log(BepInEx.Logging.LogLevel,BepInExLogInterpolatedStringHandler)" /> with
-///     string interpolation.
+/// The class isn't meant to be constructed manually.
+/// Instead, use <see cref="ManualLogSource.Log(BepInEx.Logging.LogLevel,BepInExLogInterpolatedStringHandler)" /> with string interpolation.
 /// </remarks>
 [InterpolatedStringHandler]
 public class BepInExLogInterpolatedStringHandler
@@ -24,7 +22,7 @@ public class BepInExLogInterpolatedStringHandler
     private readonly StringBuilder sb;
 
     /// <summary>
-    ///     Constructs a log handler.
+    /// Constructs a log handler.
     /// </summary>
     /// <param name="literalLength">Length of the literal string.</param>
     /// <param name="formattedCount">Number for formatted items.</param>
@@ -41,12 +39,12 @@ public class BepInExLogInterpolatedStringHandler
     }
 
     /// <summary>
-    ///     Whether the interpolation is enabled and string will be logged.
+    /// Whether the interpolation is enabled and string will be logged.
     /// </summary>
     public bool Enabled { get; }
 
     /// <summary>
-    ///     Appends a literal string to the interpolation.
+    /// Appends a literal string to the interpolation.
     /// </summary>
     /// <param name="s">String to append.</param>
     public void AppendLiteral(string s)
@@ -57,7 +55,7 @@ public class BepInExLogInterpolatedStringHandler
     }
 
     /// <summary>
-    ///     Appends a value to the interpolation.
+    /// Appends a value to the interpolation.
     /// </summary>
     /// <param name="t">Value to append.</param>
     /// <typeparam name="T">Type of the value to append.</typeparam>
@@ -70,7 +68,7 @@ public class BepInExLogInterpolatedStringHandler
     }
 
     /// <summary>
-    ///     Append a formattable item.
+    /// Append a formattable item.
     /// </summary>
     /// <param name="t">Item to append.</param>
     /// <param name="format">Format to append with.</param>
@@ -84,7 +82,7 @@ public class BepInExLogInterpolatedStringHandler
     }
 
     /// <summary>
-    ///     Append an IntPtr.
+    /// Append an IntPtr.
     /// </summary>
     /// <param name="t">Item to append.</param>
     /// <param name="format">Format to append with.</param>

@@ -9,12 +9,16 @@ using BepInEx.NET.CoreCLR;
 using BepInEx.NET.Shared;
 using BepInEx.Preloader.Core;
 
+/// <summary>Entry point used by the .NET CoreCLR startup hook.</summary>
 public class StartupHook
 {
+    /// <summary>Directories searched when resolving BepInEx assemblies.</summary>
     public static List<string> ResolveDirectories = new();
 
+    /// <summary>Fallback executable name used when the game assembly cannot be determined.</summary>
     public static string DoesNotExistPath = "_doesnotexist_.exe";
 
+    /// <summary>Determines the game assembly and initializes BepInEx.</summary>
     public static void Initialize()
     {
         var executableFilename = Process.GetCurrentProcess().MainModule.FileName;
@@ -26,6 +30,10 @@ public class StartupHook
         Initialize(assemblyFilename);
     }
 
+    /// <summary>Initializes BepInEx for the given game assembly.</summary>
+    /// <param name="assemblyFilename">Full path to the game assembly.</param>
+    /// <param name="bepinRootPath">Root path of the BepInEx installation. Derived from the assembly path if null.</param>
+    /// <param name="alc">Assembly load context to load BepInEx into. Uses the default context if null.</param>
     public static void Initialize(string assemblyFilename, string bepinRootPath = null, AssemblyLoadContext alc = null)
     {
         var silentExceptionLog = $"bepinex_preloader_{DateTime.Now:yyyyMMdd_HHmmss_fff}.log";

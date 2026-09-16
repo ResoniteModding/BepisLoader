@@ -8,16 +8,21 @@ using BepInEx.Unix;
 
 namespace BepInEx;
 
+/// <summary>Manages the external console used for log output.</summary>
 public static class ConsoleManager
 {
+    /// <summary>Hints how console output should be redirected.</summary>
     public enum ConsoleOutRedirectType
     {
+        /// <summary>Lets BepInEx decide how to redirect console output.</summary>
         [Description("Auto")]
         Auto = 0,
 
+        /// <summary>Prefers redirecting to console output; if possible, closes original standard output.</summary>
         [Description("Console Out")]
         ConsoleOut,
 
+        /// <summary>Prefers redirecting to standard output; if possible, closes console out.</summary>
         [Description("Standard Out")]
         StandardOut
     }
@@ -26,21 +31,25 @@ public static class ConsoleManager
 
     private const string ENABLE_CONSOLE_ARG = "--enable-console";
 
+    /// <summary>Whether to show a console for log output.</summary>
     public static readonly ConfigEntry<bool> ConfigConsoleEnabled = ConfigFile.CoreConfig.Bind(
      "Logging.Console", "Enabled",
      false,
      "Enables showing a console for log output.");
 
+    /// <summary>Whether closing the console is prevented in a platform-specific way.</summary>
     public static readonly ConfigEntry<bool> ConfigPreventClose = ConfigFile.CoreConfig.Bind(
      "Logging.Console", "PreventClose",
      false,
      "If enabled, will prevent closing the console (either by deleting the close button or in other platform-specific way).");
 
+    /// <summary>Whether the console uses the Shift-JIS encoding instead of UTF-8.</summary>
     public static readonly ConfigEntry<bool> ConfigConsoleShiftJis = ConfigFile.CoreConfig.Bind(
      "Logging.Console", "ShiftJisEncoding",
      false,
      "If true, console is set to the Shift-JIS encoding, otherwise UTF-8 encoding.");
 
+    /// <summary>Hints what handle to assign as standard output.</summary>
     public static readonly ConfigEntry<ConsoleOutRedirectType> ConfigConsoleOutRedirectType =
         ConfigFile.CoreConfig.Bind(
                                    "Logging.Console", "StandardOutType",
@@ -74,26 +83,30 @@ public static class ConsoleManager
         }
     }
 
+    /// <summary>True if the console is enabled via config or the --enable-console argument.</summary>
     public static bool ConsoleEnabled => EnableConsoleArgOverride ?? ConfigConsoleEnabled.Value;
 
     internal static IConsoleDriver Driver { get; set; }
 
     /// <summary>
-    ///     True if an external console has been started, false otherwise.
+    /// True if an external console has been started, false otherwise.
     /// </summary>
     public static bool ConsoleActive => Driver?.ConsoleActive ?? false;
 
     /// <summary>
-    ///     The stream that writes to the standard out stream of the process. Should never be null.
+    /// The stream that writes to the standard out stream of the process. Should never be null.
     /// </summary>
     public static TextWriter StandardOutStream => Driver?.StandardOut;
 
     /// <summary>
-    ///     The stream that writes to an external console. Null if no such console exists
+    /// The stream that writes to an external console. Null if no such console exists
     /// </summary>
     public static TextWriter ConsoleStream => Driver?.ConsoleOut;
 
 
+    /// <summary>Initializes the console driver for the current platform.</summary>
+    /// <param name="alreadyActive">Whether a console is already active.</param>
+    /// <param name="useManagedEncoder">Whether to use the managed console encoder.</param>
     public static void Initialize(bool alreadyActive, bool useManagedEncoder)
     {
         if (PlatformUtils.Is(Platform.Unix))
@@ -113,6 +126,7 @@ public static class ConsoleManager
             throw new InvalidOperationException("Driver has not been initialized");
     }
 
+    /// <summary>Creates and attaches an external console.</summary>
     public static void CreateConsole()
     {
         if (ConsoleActive)
@@ -131,6 +145,7 @@ public static class ConsoleManager
             Driver.PreventClose();
     }
 
+    /// <summary>Detaches the external console.</summary>
     public static void DetachConsole()
     {
         if (!ConsoleActive)
@@ -141,12 +156,16 @@ public static class ConsoleManager
         Driver.DetachConsole();
     }
 
+    /// <summary>Sets the title of the external console.</summary>
+    /// <param name="title">Title to display.</param>
     public static void SetConsoleTitle(string title)
     {
         DriverCheck();
 
         Driver.SetConsoleTitle(title);
     }
+    /// <summary>Sets the icon of the external console.</summary>
+    /// <param name="iconStream">Stream containing the icon.</param>
     public static void SetConsoleIcon(Stream iconStream)
     {
         DriverCheck();
@@ -154,6 +173,8 @@ public static class ConsoleManager
         Driver.SetConsoleIcon(iconStream);
     }
 
+    /// <summary>Sets the foreground color of the external console.</summary>
+    /// <param name="color">Color to set.</param>
     public static void SetConsoleColor(ConsoleColor color)
     {
         DriverCheck();

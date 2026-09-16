@@ -13,7 +13,7 @@ using Mono.Cecil;
 namespace BepInEx;
 
 /// <summary>
-///     Generic helper properties and methods.
+/// Generic helper properties and methods.
 /// </summary>
 public static class Utility
 {
@@ -23,7 +23,7 @@ public static class Utility
     public static AssemblyLoadContext LoadContext = null!;
 
     /// <summary>
-    ///    BepInEx version.
+    /// BepInEx version.
     /// </summary>
     public static SemanticVersioning.Version BepInExVersion =
         SemanticVersioning.Version.Parse(MetadataHelper.GetAttributes<AssemblyInformationalVersionAttribute>(typeof(Utility).Assembly)[0]
@@ -33,13 +33,13 @@ public static class Utility
     private static bool? sreEnabled;
 
     /// <summary>
-    ///     Whether current Common Language Runtime supports dynamic method generation using
-    ///     <see cref="System.Reflection.Emit" /> namespace.
+    /// Whether current Common Language Runtime supports dynamic method generation using
+    /// <see cref="System.Reflection.Emit" /> namespace.
     /// </summary>
     public static bool CLRSupportsDynamicAssemblies => CheckSRE();
 
     /// <summary>
-    ///     An encoding for UTF-8 which does not emit a byte order mark (BOM).
+    /// An encoding for UTF-8 which does not emit a byte order mark (BOM).
     /// </summary>
     public static Encoding UTF8NoBom { get; } = new UTF8Encoding(false);
 
@@ -68,7 +68,7 @@ public static class Utility
     }
 
     /// <summary>
-    ///     Try to perform an action.
+    /// Try to perform an action.
     /// </summary>
     /// <param name="action">Action to perform.</param>
     /// <param name="exception">Possible exception that gets returned.</param>
@@ -89,14 +89,14 @@ public static class Utility
     }
 
     /// <summary>
-    ///     Combines multiple paths together, as the specific method is not available in .NET 3.5.
+    /// Combines multiple paths together, as the specific method is not available in .NET 3.5.
     /// </summary>
     /// <param name="parts">The multiple paths to combine together.</param>
     /// <returns>A combined path.</returns>
     public static string CombinePaths(params string[] parts) => parts.Aggregate(Path.Combine);
 
     /// <summary>
-    ///     Returns the parent directory of a path, optionally specifying the amount of levels.
+    /// Returns the parent directory of a path, optionally specifying the amount of levels.
     /// </summary>
     /// <param name="path">The path to get the parent directory of.</param>
     /// <param name="levels">The amount of levels to traverse. Defaults to 1</param>
@@ -110,7 +110,7 @@ public static class Utility
     }
 
     /// <summary>
-    ///     Tries to parse a bool, with a default value if unable to parse.
+    /// Tries to parse a bool, with a default value if unable to parse.
     /// </summary>
     /// <param name="input">The string to parse</param>
     /// <param name="defaultValue">The value to return if parsing is unsuccessful.</param>
@@ -119,21 +119,21 @@ public static class Utility
         bool.TryParse(input, out var result) ? result : defaultValue;
 
     /// <summary>
-    ///     Converts a file path into a UnityEngine.WWW format.
+    /// Converts a file path into a UnityEngine.WWW format.
     /// </summary>
     /// <param name="path">The file path to convert.</param>
     /// <returns>A converted file path.</returns>
     public static string ConvertToWWWFormat(string path) => $"file://{path.Replace('\\', '/')}";
 
     /// <summary>
-    ///     Indicates whether a specified string is null, empty, or consists only of white-space characters.
+    /// Indicates whether a specified string is null, empty, or consists only of white-space characters.
     /// </summary>
     /// <param name="self">The string to test.</param>
     /// <returns>True if the value parameter is null or empty, or if value consists exclusively of white-space characters.</returns>
     public static bool IsNullOrWhiteSpace(this string self) => self == null || self.All(char.IsWhiteSpace);
 
     /// <summary>
-    ///     Sorts a given dependency graph using a direct toposort, reporting possible cyclic dependencies.
+    /// Sorts a given dependency graph using a direct toposort, reporting possible cyclic dependencies.
     /// </summary>
     /// <param name="nodes">Nodes to sort</param>
     /// <param name="dependencySelector">Function that maps a node to a collection of its dependencies.</param>
@@ -184,10 +184,11 @@ public static class Utility
     }
 
     /// <summary>
-    ///     Try to resolve and load the given assembly DLL.
+    /// Try to resolve and load the given assembly DLL.
     /// </summary>
     /// <param name="assemblyName">Name of the assembly, of the type <see cref="AssemblyName" />.</param>
     /// <param name="directory">Directory to search the assembly from.</param>
+    /// <param name="loader">Function that loads an assembly from a file path.</param>
     /// <param name="assembly">The loaded assembly.</param>
     /// <returns>True, if the assembly was found and loaded. Otherwise, false.</returns>
     public static bool TryResolveDllAssembly<T>(AssemblyName assemblyName,
@@ -236,7 +237,7 @@ public static class Utility
     }
 
     /// <summary>
-    ///     Checks whether a given cecil type definition is a subtype of a provided type.
+    /// Checks whether a given cecil type definition is a subtype of a provided type.
     /// </summary>
     /// <param name="self">Cecil type definition</param>
     /// <param name="td">Type to check against</param>
@@ -249,7 +250,7 @@ public static class Utility
     }
 
     /// <summary>
-    ///     Try to resolve and load the given assembly DLL.
+    /// Try to resolve and load the given assembly DLL.
     /// </summary>
     /// <param name="assemblyName">Name of the assembly, of the type <see cref="AssemblyName" />.</param>
     /// <param name="directory">Directory to search the assembly from.</param>
@@ -259,7 +260,7 @@ public static class Utility
         TryResolveDllAssembly(assemblyName, directory, LoadContext.LoadFromAssemblyPath, out assembly);
 
     /// <summary>
-    ///     Try to resolve and load the given assembly DLL.
+    /// Try to resolve and load the given assembly DLL.
     /// </summary>
     /// <param name="assemblyName">Name of the assembly, of the type <see cref="AssemblyName" />.</param>
     /// <param name="directory">Directory to search the assembly from.</param>
@@ -274,7 +275,7 @@ public static class Utility
                               s => AssemblyDefinition.ReadAssembly(s, readerParameters), out assembly);
 
     /// <summary>
-    ///     Tries to create a file with the given name
+    /// Tries to create a file with the given name
     /// </summary>
     /// <param name="path">Path of the file to create</param>
     /// <param name="mode">File open mode</param>
@@ -302,6 +303,9 @@ public static class Utility
         }
     }
 
+    /// <summary>Enumerates all methods of the type and its base types.</summary>
+    /// <param name="type">Type definition to enumerate.</param>
+    /// <returns>All methods declared on the type and its base types.</returns>
     public static IEnumerable<MethodDefinition> EnumerateAllMethods(this TypeDefinition type)
     {
         var currentType = type;
@@ -316,7 +320,7 @@ public static class Utility
     }
 
     /// <summary>
-    ///     Compute a MD5 hash of the given stream.
+    /// Compute a MD5 hash of the given stream.
     /// </summary>
     /// <param name="stream">Stream to hash</param>
     /// <returns>MD5 hash as a hex string</returns>
@@ -355,7 +359,7 @@ public static class Utility
     }
 
     /// <summary>
-    ///     Convert the given array to a hex string.
+    /// Convert the given array to a hex string.
     /// </summary>
     /// <param name="data">Bytes to convert.</param>
     /// <returns>Bytes reinterpreted as a hex number.</returns>
@@ -384,15 +388,14 @@ public static class Utility
     }
 
     /// <summary>
-    ///     Try to parse given string as an assembly name
+    /// Try to parse given string as an assembly name
     /// </summary>
     /// <param name="fullName">Fully qualified assembly name</param>
     /// <param name="assemblyName">Resulting <see cref="AssemblyName" /> instance</param>
     /// <returns><c>true</c>, if parsing was successful, otherwise <c>false</c></returns>
     /// <remarks>
-    ///     On some versions of mono, using <see cref="Assembly.GetName()" /> fails because it runs on unmanaged side
-    ///     which has problems with encoding.
-    ///     Using <see cref="AssemblyName" /> solves this by doing parsing on managed side instead.
+    /// On some versions of mono, using <see cref="Assembly.GetName()" /> fails because it runs on unmanaged side which has problems with encoding.
+    /// Using <see cref="AssemblyName" /> solves this by doing parsing on managed side instead.
     /// </remarks>
     public static bool TryParseAssemblyName(string fullName, out AssemblyName assemblyName)
     {
@@ -422,8 +425,7 @@ public static class Utility
     }
 
     /// <summary>
-    ///     Gets unique files in all given directories. If the file with the same name exists in multiple directories,
-    ///     only the first occurrence is returned.
+    /// Gets unique files in all given directories. If the file with the same name exists in multiple directories, only the first occurrence is returned.
     /// </summary>
     /// <param name="directories">Directories to search from.</param>
     /// <param name="pattern">File pattern to search.</param>

@@ -3,7 +3,7 @@
 namespace BepInEx.Configuration;
 
 /// <summary>
-///     Base type of all classes representing and enforcing acceptable values of config settings.
+/// Base type of all classes representing and enforcing acceptable values of config settings.
 /// </summary>
 public abstract class AcceptableValueBase
 {
@@ -14,22 +14,22 @@ public abstract class AcceptableValueBase
     }
 
     /// <summary>
-    ///     Type of the supported values.
+    /// Type of the supported values.
     /// </summary>
     public Type ValueType { get; }
 
     /// <summary>
-    ///     Change the value to be acceptable, if it's not already.
+    /// Change the value to be acceptable, if it's not already.
     /// </summary>
     public abstract object Clamp(object value);
 
     /// <summary>
-    ///     Check if the value is an acceptable value.
+    /// Check if the value is an acceptable value.
     /// </summary>
     public abstract bool IsValid(object value);
 
     /// <summary>
-    ///     Get the string for use in config files.
+    /// Get the string for use in config files.
     /// </summary>
     public abstract string ToDescriptionString();
 }

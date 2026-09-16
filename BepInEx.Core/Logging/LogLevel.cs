@@ -3,59 +3,59 @@
 namespace BepInEx.Logging;
 
 /// <summary>
-///     The level, or severity of a log entry.
+/// The level, or severity of a log entry.
 /// </summary>
 [Flags]
 public enum LogLevel
 {
     /// <summary>
-    ///     No level selected.
+    /// No level selected.
     /// </summary>
     None = 0,
 
     /// <summary>
-    ///     A fatal error has occurred, which cannot be recovered from.
+    /// A fatal error has occurred, which cannot be recovered from.
     /// </summary>
     Fatal = 1,
 
     /// <summary>
-    ///     An error has occured, but can be recovered from.
+    /// An error has occured, but can be recovered from.
     /// </summary>
     Error = 2,
 
     /// <summary>
-    ///     A warning has been produced, but does not necessarily mean that something wrong has happened.
+    /// A warning has been produced, but does not necessarily mean that something wrong has happened.
     /// </summary>
     Warning = 4,
 
     /// <summary>
-    ///     An important message that should be displayed to the user.
+    /// An important message that should be displayed to the user.
     /// </summary>
     Message = 8,
 
     /// <summary>
-    ///     A message of low importance.
+    /// A message of low importance.
     /// </summary>
     Info = 16,
 
     /// <summary>
-    ///     A message that would likely only interest a developer.
+    /// A message that would likely only interest a developer.
     /// </summary>
     Debug = 32,
 
     /// <summary>
-    ///     All log levels.
+    /// All log levels.
     /// </summary>
     All = Fatal | Error | Warning | Message | Info | Debug
 }
 
 /// <summary>
-///     Helper methods for log level handling.
+/// Helper methods for log level handling.
 /// </summary>
 public static class LogLevelExtensions
 {
     /// <summary>
-    ///     Gets the highest log level when there could potentially be multiple levels provided.
+    /// Gets the highest log level when there could potentially be multiple levels provided.
     /// </summary>
     /// <param name="levels">The log level(s).</param>
     /// <returns>The highest log level supplied.</returns>
@@ -72,7 +72,7 @@ public static class LogLevelExtensions
     }
 
     /// <summary>
-    ///     Returns a translation of a log level to it's associated console colour.
+    /// Returns a translation of a log level to it's associated console colour.
     /// </summary>
     /// <param name="level">The log level(s).</param>
     /// <returns>A console color associated with the highest log level supplied.</returns>

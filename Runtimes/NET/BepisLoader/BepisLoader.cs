@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace BepisLoader;
 
+/// <summary>Bootstraps BepInEx and launches the game.</summary>
 public class BepisLoader
 {
     internal static string resoDir = string.Empty;
@@ -46,8 +47,8 @@ public class BepisLoader
 
         var asm = alc.LoadFromAssemblyPath(Path.Combine(bepinPath, "core", "BepInEx.NET.CoreCLR.dll"));
 
-        var t = asm.GetType("StartupHook");
-        var m = t.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static, [typeof(string), typeof(string), typeof(AssemblyLoadContext)]);
+        var t = asm.GetType("StartupHook") ?? throw new InvalidOperationException("StartupHook type not found.");
+        var m = t.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static, [typeof(string), typeof(string), typeof(AssemblyLoadContext)]) ?? throw new InvalidOperationException("StartupHook.Initialize method not found.");
         m.Invoke(null, [resoDllPath, bepinPath, alc]);
 
         // Find and load Resonite
@@ -156,6 +157,8 @@ public class BepisLoader
     private static string logPath = string.Empty;
     private static readonly object _lock = new object();
     private static readonly HashSet<string> _loggedMessages = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>Appends a message to the loader log file.</summary>
+    /// <param name="message">Message to log. Duplicate messages are only written once.</param>
     public static void Log(string message)
     {
         try

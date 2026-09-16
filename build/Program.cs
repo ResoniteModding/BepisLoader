@@ -1,4 +1,3 @@
-#pragma warning disable CS1591
 // ReSharper disable ClassNeverInstantiated.Global
 using System;
 using System.Collections.Generic;
@@ -19,8 +18,12 @@ using Cake.Json;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 
+/// <summary>Cake Frosting build entry point.</summary>
 public static class Program
 {
+    /// <summary>Runs the build with the given command-line arguments.</summary>
+    /// <param name="args">Command-line arguments passed to the build.</param>
+    /// <returns>The process exit code.</returns>
     public static int Main(string[] args)
     {
         return new CakeHost()
@@ -29,15 +32,21 @@ public static class Program
     }
 }
 
+/// <summary>Shared state and settings for the build.</summary>
 public class BuildContext : FrostingContext
 {
+    /// <summary>Kind of build to produce.</summary>
     public enum ProjectBuildType
     {
+        /// <summary>Stable release build.</summary>
         Release,
+        /// <summary>Local development build.</summary>
         Development,
+        /// <summary>Bleeding-edge CI build.</summary>
         BleedingEdge
     }
 
+    /// <summary>Version of hookfxr downloaded for distributions.</summary>
     public const string HOOKFXR_VERSION = "1.1.0";
 
     internal readonly DistributionTarget[] Distributions =
@@ -51,6 +60,8 @@ public class BuildContext : FrostingContext
     };
 
 
+    /// <summary>Creates build state from the Cake context.</summary>
+    /// <param name="ctx">Cake context to derive paths and arguments from.</param>
     public BuildContext(ICakeContext ctx)
         : base(ctx)
     {
@@ -70,20 +81,32 @@ public class BuildContext : FrostingContext
         NugetSource = ctx.Argument("nuget-source", "https://nuget.bepinex.dev/v3/index.json");
     }
 
+    /// <summary>Kind of build to produce.</summary>
     public ProjectBuildType BuildType { get; }
+    /// <summary>CI build identifier. Negative when not built by CI.</summary>
     public int BuildId { get; }
+    /// <summary>Commit the last build ran on. Empty when building everything.</summary>
     public string LastBuildCommit { get; }
+    /// <summary>API key used to push NuGet packages.</summary>
     public string NugetApiKey { get; }
+    /// <summary>NuGet feed packages are pushed to.</summary>
     public string NugetSource { get; }
 
+    /// <summary>Repository root directory.</summary>
     public DirectoryPath RootDirectory { get; }
+    /// <summary>Directory holding all build output, including final distributions.</summary>
     public DirectoryPath OutputDirectory { get; }
+    /// <summary>Directory holding cached downloads.</summary>
     public DirectoryPath CacheDirectory { get; }
+    /// <summary>Directory holding assembled distributions.</summary>
     public DirectoryPath DistributionDirectory { get; }
 
+    /// <summary>Version prefix read from the repository properties.</summary>
     public string VersionPrefix { get; }
+    /// <summary>Commit the current build is produced from.</summary>
     public GitCommit CurrentCommit { get; }
 
+    /// <summary>Version suffix for the current build type.</summary>
     public string VersionSuffix => BuildType switch
     {
         ProjectBuildType.Release      => "",
@@ -92,6 +115,7 @@ public class BuildContext : FrostingContext
         var _                         => throw new ArgumentOutOfRangeException()
     };
 
+    /// <summary>Full package version of the current build.</summary>
     public string BuildPackageVersion =>
         VersionPrefix + BuildType switch
         {
@@ -99,12 +123,15 @@ public class BuildContext : FrostingContext
             var _                    => $"-{VersionSuffix}+{this.GitShortenSha(RootDirectory, CurrentCommit)}",
         };
 
+    /// <summary>Download URL of the hookfxr release zip.</summary>
     public static string HookfxrZipUrl = $"https://github.com/ResoniteModding/hookfxr/releases/download/v{HOOKFXR_VERSION}/hookfxr-Release.zip";
 }
 
+/// <summary>Cleans build output directories.</summary>
 [TaskName("Clean")]
 public sealed class CleanTask : FrostingTask<BuildContext>
 {
+    /// <inheritdoc/>
     public override void Run(BuildContext ctx)
     {
         ctx.CreateDirectory(ctx.OutputDirectory);
@@ -117,10 +144,12 @@ public sealed class CleanTask : FrostingTask<BuildContext>
     }
 }
 
+/// <summary>Restores dotnet CLI tools.</summary>
 [TaskName("RestoreTools")]
 [IsDependentOn(typeof(CleanTask))]
 public sealed class RestoreToolsTask : FrostingTask<BuildContext>
 {
+    /// <inheritdoc/>
     public override void Run(BuildContext ctx)
     {
         ctx.Log.Information("Restoring dotnet tools...");
@@ -134,10 +163,12 @@ public sealed class RestoreToolsTask : FrostingTask<BuildContext>
     }
 }
 
+/// <summary>Builds the solution and publishes the loader.</summary>
 [TaskName("Compile")]
 [IsDependentOn(typeof(RestoreToolsTask))]
 public sealed class CompileTask : FrostingTask<BuildContext>
 {
+    /// <inheritdoc/>
     public override void Run(BuildContext ctx)
     {
         var hasBepisLoader = ctx.Distributions.Any(d => d.Runtime == "BepisLoader");
@@ -208,9 +239,11 @@ public sealed class CompileTask : FrostingTask<BuildContext>
     }
 }
 
+/// <summary>Downloads external distribution dependencies.</summary>
 [TaskName("DownloadDependencies")]
 public sealed class DownloadDependenciesTask : FrostingTask<BuildContext>
 {
+    /// <inheritdoc/>
     public override void Run(BuildContext ctx)
     {
         ctx.Log.Information("Downloading dependencies");
@@ -232,11 +265,13 @@ public sealed class DownloadDependenciesTask : FrostingTask<BuildContext>
     }
 }
 
+/// <summary>Assembles distributable archives from build output.</summary>
 [TaskName("MakeDist")]
 [IsDependentOn(typeof(CompileTask))]
 [IsDependentOn(typeof(DownloadDependenciesTask))]
 public sealed class MakeDistTask : FrostingTask<BuildContext>
 {
+    /// <inheritdoc/>
     public override void Run(BuildContext ctx)
     {
         ctx.CreateDirectory(ctx.DistributionDirectory);
@@ -377,12 +412,15 @@ public sealed class MakeDistTask : FrostingTask<BuildContext>
     }
 }
 
+/// <summary>Pushes built packages to the NuGet feed.</summary>
 [TaskName("PushNuGet")]
 public sealed class PushNuGetTask : FrostingTask<BuildContext>
 {
+    /// <inheritdoc/>
     public override bool ShouldRun(BuildContext ctx) => !string.IsNullOrWhiteSpace(ctx.NugetApiKey) &&
                                                         ctx.BuildType != BuildContext.ProjectBuildType.Development;
 
+    /// <inheritdoc/>
     public override void Run(BuildContext ctx)
     {
         var nugetPath = ctx.OutputDirectory.Combine("NuGet");
@@ -396,12 +434,15 @@ public sealed class PushNuGetTask : FrostingTask<BuildContext>
     }
 }
 
+/// <summary>Builds the Thunderstore package for the loader.</summary>
 [TaskName("BuildThunderstorePackage")]
 [IsDependentOn(typeof(MakeDistTask))]
 public sealed class BuildThunderstorePackageTask : FrostingTask<BuildContext>
 {
+    /// <inheritdoc/>
     public override bool ShouldRun(BuildContext ctx) => ctx.Distributions.Any(d => d.Runtime == "BepisLoader");
 
+    /// <inheritdoc/>
     public override void Run(BuildContext ctx)
     {
         ctx.Log.Information("Building Thunderstore package for BepisLoader...");
@@ -434,15 +475,18 @@ public sealed class BuildThunderstorePackageTask : FrostingTask<BuildContext>
     }
 }
 
+/// <summary>Fixes Linux executable permissions inside the Thunderstore package.</summary>
 [TaskName("FixThunderstoreLinuxPermissions")]
 [IsDependentOn(typeof(BuildThunderstorePackageTask))]
 [SupportedOSPlatform("linux")]
 public sealed class FixThunderstoreLinuxPermissionsTask : FrostingTask<BuildContext>
 {
+    /// <inheritdoc/>
     public override bool ShouldRun(BuildContext ctx) =>
         ctx.Distributions.Any(d => d.Runtime == "BepisLoader") &&
         System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux);
 
+    /// <inheritdoc/>
     [SupportedOSPlatform("linux")]
     public override void Run(BuildContext ctx)
     {
@@ -498,12 +542,14 @@ public sealed class FixThunderstoreLinuxPermissionsTask : FrostingTask<BuildCont
     }
 }
 
+/// <summary>Zips distributions and writes release metadata.</summary>
 [TaskName("Publish")]
 [IsDependentOn(typeof(MakeDistTask))]
 [IsDependentOn(typeof(PushNuGetTask))]
 [IsDependentOn(typeof(FixThunderstoreLinuxPermissionsTask))]
 public sealed class PublishTask : FrostingTask<BuildContext>
 {
+    /// <inheritdoc/>
     public override void Run(BuildContext ctx)
     {
         ctx.Log.Information("Packing BepInEx");
@@ -545,6 +591,7 @@ public sealed class PublishTask : FrostingTask<BuildContext>
     }
 }
 
+/// <summary>Default build task.</summary>
 [TaskName("Default")]
 [IsDependentOn(typeof(CompileTask))]
 public class DefaultTask : FrostingTask { }

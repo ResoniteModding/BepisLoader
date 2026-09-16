@@ -3,7 +3,7 @@
 namespace BepInEx.Logging;
 
 /// <summary>
-///     A source that routes all logs from the inbuilt .NET <see cref="Trace" /> API to the BepInEx logging system.
+/// A source that routes all logs from the inbuilt .NET <see cref="Trace" /> API to the BepInEx logging system.
 /// </summary>
 /// <inheritdoc cref="TraceListener" />
 public class TraceLogSource : TraceListener
@@ -11,7 +11,7 @@ public class TraceLogSource : TraceListener
     private static TraceLogSource traceListener;
 
     /// <summary>
-    ///     Creates a new trace log source.
+    /// Creates a new trace log source.
     /// </summary>
     protected TraceLogSource()
     {
@@ -19,17 +19,17 @@ public class TraceLogSource : TraceListener
     }
 
     /// <summary>
-    ///     Whether Trace logs are currently being rerouted.
+    /// Whether Trace logs are currently being rerouted.
     /// </summary>
     public static bool IsListening { get; private set; }
 
     /// <summary>
-    ///     Internal log source.
+    /// Internal log source.
     /// </summary>
     protected ManualLogSource LogSource { get; }
 
     /// <summary>
-    ///     Creates a new trace log source.
+    /// Creates a new trace log source.
     /// </summary>
     /// <returns>New log source (or already existing one).</returns>
     public static ILogSource CreateSource()
@@ -45,13 +45,13 @@ public class TraceLogSource : TraceListener
     }
 
     /// <summary>
-    ///     Writes a message to the underlying <see cref="ManualLogSource" /> instance.
+    /// Writes a message to the underlying <see cref="ManualLogSource" /> instance.
     /// </summary>
     /// <param name="message">The message to write.</param>
     public override void Write(string message) => LogSource.Log(LogLevel.Info, message);
 
     /// <summary>
-    ///     Writes a message and a newline to the underlying <see cref="ManualLogSource" /> instance.
+    /// Writes a message and a newline to the underlying <see cref="ManualLogSource" /> instance.
     /// </summary>
     /// <param name="message">The message to write.</param>
     public override void WriteLine(string message) => LogSource.Log(LogLevel.Info, message);

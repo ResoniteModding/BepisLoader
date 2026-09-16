@@ -8,6 +8,7 @@ using BepInEx.Logging;
 
 namespace BepInEx.Preloader.Core.Logging;
 
+/// <summary>Helper methods for logging chainloader startup information.</summary>
 public static class ChainloaderLogHelper
 {
     private static Dictionary<string, string> MacOSVersions { get; } = new()
@@ -33,6 +34,8 @@ public static class ChainloaderLogHelper
         ["21.2.0"] = "12.1",
     };
 
+    /// <summary>Logs version, platform and process information.</summary>
+    /// <param name="log">Log source to write to.</param>
     public static void PrintLogInfo(ManualLogSource log)
     {
         var bepinVersion = Utility.BepInExVersion;
@@ -142,6 +145,7 @@ public static class ChainloaderLogHelper
         return builder.ToString();
     }
 
+    /// <summary>Replays logs captured by the preloader through the chainloader loggers.</summary>
     public static void RewritePreloaderLogs()
     {
         if (PreloaderConsoleListener.LogEvents == null || PreloaderConsoleListener.LogEvents.Count == 0)

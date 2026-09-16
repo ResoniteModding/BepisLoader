@@ -4,13 +4,13 @@ using System.Linq;
 namespace BepInEx.Configuration;
 
 /// <summary>
-///     Specify the list of acceptable values for a setting.
+/// Specify the list of acceptable values for a setting.
 /// </summary>
 public class AcceptableValueList<T> : AcceptableValueBase where T : IEquatable<T>
 {
     /// <summary>
-    ///     Specify the list of acceptable values for a setting.
-    ///     If the setting does not equal any of the values, it will be set to the first one.
+    /// Specify the list of acceptable values for a setting.
+    /// If the setting does not equal any of the values, it will be set to the first one.
     /// </summary>
     public AcceptableValueList(params T[] acceptableValues) : base(typeof(T))
     {
@@ -22,7 +22,7 @@ public class AcceptableValueList<T> : AcceptableValueBase where T : IEquatable<T
     }
 
     /// <summary>
-    ///     List of values that a setting can take.
+    /// List of values that a setting can take.
     /// </summary>
     public virtual T[] AcceptableValues { get; }
 
