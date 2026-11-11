@@ -59,14 +59,14 @@ DOTNET_EXECUTABLE="$DOTNET_ROOT/dotnet"
 
 main()
 {
-	# Make sure the dotnet installer is executable, grab the .NET 9.0 runtime and
+	# Make sure the dotnet installer is executable, grab the .NET runtime and
 	# just place it in the main Resonite folder.
 
 	chmod +x "$DOTNET_INSTALL_SCRIPT"
 
-	# Install .NET 10 into the current directory
+	# Install .NET into the current directory
 
-	bash "$DOTNET_INSTALL_SCRIPT" --verbose --channel 10.0 --runtime dotnet --install-dir "$DOTNET_ROOT"
+	bash "$DOTNET_INSTALL_SCRIPT" --verbose --channel 11.0 --runtime dotnet --install-dir "$DOTNET_ROOT"
 
 
 	# Not technically required, but mark dotnet itself as executable just in case.
@@ -79,10 +79,10 @@ main()
 		cat > "./BepisLoader.runtimeconfig.json" <<-'EOF'
 		{
 		  "runtimeOptions": {
-		    "tfm": "net10.0",
+		    "tfm": "net11.0",
 		    "framework": {
 		      "name": "Microsoft.NETCore.App",
-		      "version": "10.0.0"
+		      "version": "11.0.0"
 		    },
 		    "configProperties": {
 		      "System.Reflection.Metadata.MetadataUpdater.IsSupported": false,
