@@ -13,7 +13,7 @@
 
 A mod loader which allows using BepInEx with [Resonite](https://resonite.com/).
 
-BepisLoader is a .NET (Core) only mod loader, currently targeting .NET 10. It is built on a fork of [BepInEx](https://github.com/BepInEx/BepInEx) with all Unity aspects (Unity Mono, IL2CPP, UnityDoorstop, etc.) removed. It cannot load Unity plugins and does not support Unity games.
+BepisLoader is a .NET (Core) only mod loader, currently targeting .NET 11. It is built on a fork of [BepInEx](https://github.com/BepInEx/BepInEx) with all Unity aspects (Unity Mono, IL2CPP, UnityDoorstop, etc.) removed. It cannot load Unity plugins and does not support Unity games.
 
 ## Installation
 

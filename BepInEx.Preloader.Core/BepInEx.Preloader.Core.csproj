@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>Core classes and utilities for BepInEx Preloader</Description>
-        <TargetFrameworks>net10.0</TargetFrameworks>
+        <TargetFrameworks>net11.0</TargetFrameworks>
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\BepInEx.Core\BepInEx.Core.csproj"/>
         <ProjectReference Include="..\HarmonyX\Harmony\Harmony.csproj" SetTargetFramework="TargetFramework=netstandard2.0"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="MonoMod.Utils" Version="25.0.14"/>
+        <PackageReference Include="MonoMod.Utils" Version="25.1.0-prerelease.3"/>
     </ItemGroup>
 </Project>

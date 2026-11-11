@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <Description>BepInEx support library for Resonite</Description>
-        <TargetFrameworks>net10.0</TargetFrameworks>
+        <TargetFrameworks>net11.0</TargetFrameworks>
         <OutputPath>$(BuildDir)/BepisLoader</OutputPath>
         <OutputType>Exe</OutputType>
         <Version>1.7.0</Version>
