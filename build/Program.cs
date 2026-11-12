@@ -55,8 +55,8 @@ public class BuildContext : FrostingContext
         //new("NET.Framework", "win-x86", "net452"),
         //new("NET.CoreCLR", "win-x64", "netcoreapp3.1"),
         //new("NET.CoreCLR", "win-x64", "net9.0"),
-        new("NET", "BepisLoader", "win-x64", "net10.0"),
-        // new("NET", "BepisLoader", "linux-x64", "net10.0")
+        new("NET", "BepisLoader", "win-x64", "net11.0"),
+        // new("NET", "BepisLoader", "linux-x64", "net11.0")
     };
 
 
@@ -314,7 +314,7 @@ public sealed class MakeDistTask : FrostingTask<BuildContext>
                     ctx.Log.Warning("LinuxBootstrap.sh not found at: " + linuxBootstrapPath);
                 }
 
-                var netCoreCLRSource = ctx.OutputDirectory.Combine("NET.CoreCLR").Combine("net10.0");
+                var netCoreCLRSource = ctx.OutputDirectory.Combine("NET.CoreCLR").Combine("net11.0");
                 if (ctx.DirectoryExists(netCoreCLRSource))
                 {
                     // Create BepInEx directories only if we have files to copy
@@ -370,15 +370,15 @@ public sealed class MakeDistTask : FrostingTask<BuildContext>
                     var runtimeConfig = """
                         {
                           "runtimeOptions": {
-                            "tfm": "net10.0",
+                            "tfm": "net11.0",
                             "frameworks": [
                               {
                                 "name": "Microsoft.NETCore.App",
-                                "version": "10.0.0"
+                                "version": "11.0.0"
                               },
                               {
                                 "name": "Microsoft.WindowsDesktop.App",
-                                "version": "10.0.0"
+                                "version": "11.0.0"
                               }
                             ],
                             "configProperties": {
