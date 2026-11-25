@@ -32,10 +32,11 @@ public class DiskLogListener : ILogListener
         DisplayedLogLevel = displayedLogLevel;
 
         var counter = 1;
+        var fullLogPath = Path.Combine(Paths.BepInExRootPath, localPath);
 
         FileStream fileStream;
 
-        while (!Utility.TryOpenFileStream(Path.Combine(Paths.BepInExRootPath, localPath),
+        while (!Utility.TryOpenFileStream(fullLogPath,
                                           appendLog ? FileMode.Append : FileMode.Create, out fileStream,
                                           share: FileShare.Read, access: FileAccess.Write))
         {
@@ -49,6 +50,7 @@ public class DiskLogListener : ILogListener
             Logger.Log(LogLevel.Warning, $"Couldn't open log file '{localPath}' for writing, trying another...");
 
             localPath = $"LogOutput.{counter++}.log";
+            fullLogPath = Path.Combine(Paths.BepInExRootPath, localPath);
         }
 
         LogWriter = TextWriter.Synchronized(new StreamWriter(fileStream, Utility.UTF8NoBom));
