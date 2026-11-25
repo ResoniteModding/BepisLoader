@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Mono.Cecil;
@@ -73,13 +74,18 @@ public class PatcherContext
     /// The dictionary has the name of the file, without any directories. These are used by the dumping functionality, and as such, these are also required to be unique. They do not have to be exactly the same as the real filename, however they have to be mapped deterministically.
     /// </para>
     /// <para>Order is not respected, as it will be sorted by dependencies.</para>
+    /// <para>
+    /// Keys are compared case-insensitively: patchers name their targets with <see cref="TargetAssemblyAttribute" />
+    /// (e.g. <c>Game.dll</c>), while the keys come from the file names on disk. A case-preserving file system may
+    /// hold <c>game.dll</c>, and a case-sensitive lookup would silently skip the patch.
+    /// </para>
     /// </summary>
-    public Dictionary<string, AssemblyDefinition> AvailableAssemblies { get; } = new();
+    public Dictionary<string, AssemblyDefinition> AvailableAssemblies { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// <para>Contains a mapping of available assembly name to their original filenames.</para>
     /// </summary>
-    public Dictionary<string, string> AvailableAssembliesPaths { get; } = new();
+    public Dictionary<string, string> AvailableAssembliesPaths { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// <para>Contains a dictionary of assemblies that have been loaded as part of executing this assembly patcher.</para>
@@ -87,7 +93,7 @@ public class PatcherContext
     /// The key is the same key as used in <see cref="LoadedAssemblies" />, while the value is the actual assembly itself.
     /// </para>
     /// </summary>
-    public Dictionary<string, Assembly> LoadedAssemblies { get; } = new();
+    public Dictionary<string, Assembly> LoadedAssemblies { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// A list of plugins that will be initialized and executed, in the order of the list.
